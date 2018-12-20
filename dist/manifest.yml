@@ -1,0 +1,9 @@
+﻿---
+name: ScriptParasite
+version: 1.0.0-dev
+authors:
+- Arend van Waart
+description: Edit C# components with any Editor or IDE such as Visual Studio
+url: https://github.com/arendvw/ScriptParasite
+secret:
+  id: 0f9371a5-9665-47f6-b40b-40f7fe835d68
