@@ -29,35 +29,44 @@ namespace StudioAvw.Gh.Parasites
         public virtual string TransformText()
         {
             this.Write(@"
+using System;
+using System.Collections;
+using System.Collections.Generic;
 
 using Rhino;
 using Rhino.Geometry;
-using Rhino.DocObjects;
-using Rhino.Collections;
 
-using GH_IO;
-using GH_IO.Serialization;
 using Grasshopper;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
 
-using System;
-using System.IO;
-using System.Xml;
-using System.Xml.Linq;
-using System.Linq;
-using System.Data;
-using System.Drawing;
-using System.Reflection;
-using System.Collections;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
-
-/// Unique namespace, so visual studio won't throw any errors about duplicate definitions.
-namespace ");
+// Non-default includes.
+");
             
-            #line 33 "C:\Users\Arend\Dropbox\_PRODUCTION\Parasites\Parasites\ScriptOutput.tt"
+            #line 20 "C:\Users\Arend\Dropbox\_PRODUCTION\Parasites\Parasites\ScriptOutput.tt"
+ foreach (string usingName in CustomUsings) { 
+            
+            #line default
+            #line hidden
+            this.Write("using ");
+            
+            #line 21 "C:\Users\Arend\Dropbox\_PRODUCTION\Parasites\Parasites\ScriptOutput.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(usingName));
+            
+            #line default
+            #line hidden
+            this.Write(";\r\n");
+            
+            #line 22 "C:\Users\Arend\Dropbox\_PRODUCTION\Parasites\Parasites\ScriptOutput.tt"
+ } 
+            
+            #line default
+            #line hidden
+            this.Write("\r\n/// Unique namespace, so visual studio won\'t throw any errors about duplicate d" +
+                    "efinitions.\r\nnamespace ");
+            
+            #line 25 "C:\Users\Arend\Dropbox\_PRODUCTION\Parasites\Parasites\ScriptOutput.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(UniqueNamespace));
             
             #line default
@@ -98,21 +107,21 @@ namespace ");
                     "meters,\r\n        /// they will have a default value.\r\n        /// </summary>\r\n  " +
                     "      #region Runscript\r\n        private void RunScript(");
             
-            #line 80 "C:\Users\Arend\Dropbox\_PRODUCTION\Parasites\Parasites\ScriptOutput.tt"
+            #line 72 "C:\Users\Arend\Dropbox\_PRODUCTION\Parasites\Parasites\ScriptOutput.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(InputOutput));
             
             #line default
             #line hidden
             this.Write(")\r\n        {\r\n");
             
-            #line 82 "C:\Users\Arend\Dropbox\_PRODUCTION\Parasites\Parasites\ScriptOutput.tt"
+            #line 74 "C:\Users\Arend\Dropbox\_PRODUCTION\Parasites\Parasites\ScriptOutput.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(SourceCode));
             
             #line default
             #line hidden
             this.Write("\r\n        }\r\n        #endregion\r\n\r\n        #region Additional\r\n");
             
-            #line 87 "C:\Users\Arend\Dropbox\_PRODUCTION\Parasites\Parasites\ScriptOutput.tt"
+            #line 79 "C:\Users\Arend\Dropbox\_PRODUCTION\Parasites\Parasites\ScriptOutput.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(AdditionalCode));
             
             #line default

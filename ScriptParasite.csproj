@@ -58,6 +58,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DanielTestComponent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -81,6 +82,8 @@
     <Compile Include="ScriptParasiteInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include=".gitattributes" />
+    <Content Include=".gitignore" />
     <Content Include="ProjectOutput.tt">
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>ProjectOutput.cs</LastGenOutput>
@@ -90,14 +93,12 @@
       <LastGenOutput>ScriptOutput.cs</LastGenOutput>
     </Content>
     <None Include="dist\manifest.yml" />
+    <None Include="icon.psd" />
     <None Include="ScriptParasite.png" />
     <None Include="script\deploy.ps1" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources.resx">

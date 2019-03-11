@@ -242,6 +242,7 @@ namespace StudioAvw.Gh.Parasites
 
         protected static void WriteScriptToComponent(Component_CSNET_Script scriptObject, string filename)
         {
+            var usingCodePropertyInfo = scriptObject.ScriptSource.GetType().GetProperty("UsingCode");
             var fileContent = ReadFile(filename);
             var runscript = GetRegion(fileContent, "Runscript");
             var rsLines = runscript.Split(new[] {Environment.NewLine}, StringSplitOptions.None);
@@ -250,6 +251,38 @@ namespace StudioAvw.Gh.Parasites
             var additional = GetRegion(fileContent, "Additional");
             scriptObject.ScriptSource.ScriptCode = runscript;
             scriptObject.ScriptSource.AdditionalCode = additional;
+            if (usingCodePropertyInfo != null)
+            {
+                usingCodePropertyInfo.SetValue(scriptObject.ScriptSource, GetUsing(fileContent), null);
+            }
+        }
+
+        private static string GetUsing(string fileContent)
+        {
+            List<string> allMatches = GetUsingList(fileContent);
+
+            var output = "";
+            foreach (var item in allMatches)
+            {
+                output = output + $"using {item};\r\n";
+            }
+            return output;
+        }
+
+        private static List<string> GetUsingList(string fileContent)
+        {
+            // remove the default types if they're added...
+            var defaults = new[]
+            {
+                "System", "System.Collections", "System.Collections.Generic",
+                "Rhino", "Rhino.Geometry", "Grasshopper", "Grasshopper.Kernel",
+                "Grasshopper.Kernel.Data", "Grasshopper.Kernel.Types",
+            }.ToList();
+            // \s([0-9a-zA-Z\._]+);$
+            return Regex.Matches(fileContent, @"using\s+([0-9a-zA-Z\._=<>\ ]+);")
+                .OfType<Match>()
+                .Select(m => m.Groups[1].Value)
+                .Where(v => !defaults.Contains(v)).ToList();
         }
 
         public FileSystemWatcher Watcher { get; set; }
@@ -453,6 +486,14 @@ namespace StudioAvw.Gh.Parasites
                 AdditionalCode = Regex.Replace(script.ScriptSource.AdditionalCode, @"^( {2})( *)", @"        $2$2",
                     RegexOptions.Multiline | RegexOptions.IgnoreCase),
             };
+
+            var usingCode = script.ScriptSource.GetType()
+                .GetProperty("UsingCode")?
+                .GetValue(script.ScriptSource);
+            if (usingCode is string code)
+            {
+                output.CustomUsings = GetUsingList(code);
+            }
             var text = output.TransformText();
             try
             {
