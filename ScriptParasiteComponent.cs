@@ -61,7 +61,7 @@ namespace StudioAvw.Gh.Parasites
             {
                 var name = Regex.Replace(TargetComponent.NickName, @"\W", "_");
                 var componentId = TargetComponent.InstanceGuid.ToString().Replace(" - ", "").Substring(0, 5);
-                return $@"{Folder}\{name}-{componentId}.cs";
+                return Path.Combine($"{Folder}",$"{name}-{componentId}.cs");
             }
         }
 
