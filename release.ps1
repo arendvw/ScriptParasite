@@ -3,6 +3,7 @@
 ###
 $namePrefix = "ScriptParasite"
 $projects = "."
+$projectFile = "ScriptParasite.csproj"
 $copyToOutput =".\bin\Release\ScriptParasite.gha",
 ".\bin\Release\ScriptParasite.pdb"
 
@@ -190,6 +191,8 @@ if ($null -eq $result) {
     Write-Host $result;
     exit;
 }
+
+Write-Host $result;
 
 Write-Host "Packaging new version.."
 # Create empty temporary folder

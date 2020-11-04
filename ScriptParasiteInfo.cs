@@ -13,8 +13,7 @@ namespace StudioAvw.Gh.Parasites
 
         public override string Name => "ScriptParasite";
 
-        public override string Version => System.Diagnostics.FileVersionInfo
-            .GetVersionInfo(System.Reflection.Assembly.GetExecutingAssembly().Location).ProductVersion;
+        public override string Version => "1.0.1";
 
         public override Bitmap Icon => Resources.ScriptParasiteIcon;
 
@@ -29,6 +28,6 @@ namespace StudioAvw.Gh.Parasites
         public override string AssemblyDescription =>
             "Allows editting of C# Script components with the editor of your choice, (Visual Studio, Visual Studio Code, Rider, etc.";
 
-        public override string Version => "1.0.1";
+
     }
 }
