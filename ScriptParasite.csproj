@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>StudioAvw.Gh.Parasites</RootNamespace>
-    <AssemblyName>Parasites</AssemblyName>
+    <AssemblyName>ScriptParasite</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <NuGetPackageImportStamp>
@@ -24,12 +24,13 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Eto, Version=2.5.0.0, Culture=neutral, PublicKeyToken=552281e97c755530, processorArchitecture=MSIL">
@@ -47,8 +48,8 @@
     <Reference Include="RhinoCommon, Version=6.20.19322.20360, Culture=neutral, PublicKeyToken=552281e97c755530, processorArchitecture=MSIL">
       <HintPath>packages\RhinoCommon.6.20.19322.20361\lib\net45\RhinoCommon.dll</HintPath>
     </Reference>
-    <Reference Include="ScriptComponents">
-      <HintPath>packages\ScriptComponents.dll</HintPath>
+    <Reference Include="Script">
+      <HintPath>..\..\GH\0.9.76.0\Components\Script.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -95,9 +96,10 @@
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>ScriptOutput.cs</LastGenOutput>
     </Content>
-    <None Include="dist\manifest.yml" />
+    <None Include="manifest.yml" />
     <None Include="icon.psd" />
     <None Include="packages.config" />
+    <None Include="release.ps1" />
     <None Include="ScriptParasite.png" />
     <None Include="script\deploy.ps1" />
   </ItemGroup>
@@ -110,6 +112,9 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <CustomToolNamespace>StudioAvw.Gh.Parasites</CustomToolNamespace>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="dist\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

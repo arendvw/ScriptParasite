@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -28,5 +28,7 @@ namespace StudioAvw.Gh.Parasites
 
         public override string AssemblyDescription =>
             "Allows editting of C# Script components with the editor of your choice, (Visual Studio, Visual Studio Code, Rider, etc.";
+
+        public override string Version => "1.0.1";
     }
 }
