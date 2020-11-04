@@ -192,8 +192,6 @@ if ($null -eq $result) {
     exit;
 }
 
-Write-Host $result;
-
 Write-Host "Packaging new version.."
 # Create empty temporary folder
 $temp = ".\dist"
@@ -212,7 +210,9 @@ foreach ($item in $copyToOutput) {
     Copy-Item $item $temp
 }
 
+Write-Host "Packaging zip version.."
 $outputZip =  ".\$($namePrefix)-$($yakversion).zip";
+Compress-Archive -Path "$($temp)/*" -DestinationPath $outputZip
 
 Write-Host "Packaging yak version.."
 Copy-Item $manifestFile $temp
