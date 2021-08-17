@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -21,7 +22,7 @@ namespace StudioAvw.Gh.Parasites
     {
         /// <inheritdoc />
         public ScriptParasiteComponent() : base("Script Parasite", "ScriptPar",
-            "Allow C# scripts to edited in an external editor. Will recompile when the exported file changes.", "Math", "Scripts")
+            "Allow C# scripts to be edited in an external editor. Will recompile when the exported file changes.", "Math", "Scripts")
         {
             Message = "Disabled";
         }
@@ -51,7 +52,8 @@ namespace StudioAvw.Gh.Parasites
 
         protected string Folder { get; set; }
 
-        public override string Description => $"Allow C# scripts to edited in an external editor. Will recompile when the exported file changes, and will write parameter changes back to the C# script.\nCurrent output path: {DefaultOutputFolder}";
+        public override string Description => $"Allow C# scripts to be edited in an external editor. Will recompile when the exported file changes, and will write parameter and code changes back to the C# script automatically." +
+                                          $"\n\nCurrent output path: {DefaultOutputFolder}";
 
         protected override string HelpDescription => $"Saved script output path: {DefaultOutputFolder}";
 
@@ -73,13 +75,8 @@ namespace StudioAvw.Gh.Parasites
         {
             var defaultFolder = ReadDefaultFolder();
 
-            var enableParam = pManager.AddBooleanParameter("Enable", "E", "Enable listening for changes for the current file?",
-                GH_ParamAccess.tree, false);
-            pManager[enableParam].Optional = true;
-
-            var folderParam = pManager.AddTextParameter("Folder", "F", "Folder to write scripts to",
-                GH_ParamAccess.tree, defaultFolder);
-            pManager[folderParam].Optional = true;
+            pManager.AddBooleanParameter("Enable", "E", "Enable listening for changes for the current file?", GH_ParamAccess.item, false);
+            pManager.AddTextParameter("Folder", "F", "Folder to write scripts to", GH_ParamAccess.item, defaultFolder);
         }
 
         public static string SettingsFile => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -107,25 +104,25 @@ namespace StudioAvw.Gh.Parasites
             // reset everything, and let's start over..
             Cleanup();
             // things are botched up if this script runs more than once.
+            // events might be added more then once if this component somehow has an input of multiple items.
             if (_iteration++ != 0) return;
-            if (!da.GetDataTree<GH_Boolean>(0, out var tree)) return;
-            if (!da.GetDataTree<GH_String>(1, out var stringTree)) return;
 
-            var folder = stringTree.AllData(true).OfType<GH_String>().Select(x => x.Value).FirstOrDefault();
+            bool watch = false;
+            string folder = "";
+
+            if (!da.GetData(0, ref watch)) return;
+            if (!da.GetData(1, ref folder)) return;
+
             if (folder == null)
             {
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Scripts Folder was not set");
                 return;
             }
-
             folder = folder.Trim();
 
             if (!TryGetDirectoryVerbose(folder)) return;
 
-            var allBooleans = tree.AllData(true).Select(c => c.ScriptVariable()).Cast<bool>().ToList();
-            var success = allBooleans.Count == 1 && allBooleans[0];
-
-            if (!success)
+            if (!watch)
             {
                 return;
             }
@@ -167,7 +164,6 @@ namespace StudioAvw.Gh.Parasites
                 return;
             }
 
-
             if (!WriteScriptToFile(TargetComponent, FileNameSafe)) return;
             
             // Create a new FileSystemWatcher and set its properties.
@@ -177,6 +173,7 @@ namespace StudioAvw.Gh.Parasites
             WriteDefaultConfig(directory);
 
             EnsureProject(Path.Combine(directory, "GrasshopperScripts.csproj"));
+            EnsureEditorConfig(Path.Combine(directory, ".editorconfig"));
         }
 
         /// <summary>
@@ -242,7 +239,6 @@ namespace StudioAvw.Gh.Parasites
 
         protected static void WriteScriptToComponent(Component_CSNET_Script scriptObject, string filename)
         {
-            var usingCodePropertyInfo = scriptObject.ScriptSource.GetType().GetProperty("UsingCode");
             var fileContent = ReadFile(filename);
             var runscript = GetRegion(fileContent, "Runscript");
             var rsLines = runscript.Split(new[] {Environment.NewLine}, StringSplitOptions.None);
@@ -251,10 +247,7 @@ namespace StudioAvw.Gh.Parasites
             var additional = GetRegion(fileContent, "Additional");
             scriptObject.ScriptSource.ScriptCode = runscript;
             scriptObject.ScriptSource.AdditionalCode = additional;
-            if (usingCodePropertyInfo != null)
-            {
-                usingCodePropertyInfo.SetValue(scriptObject.ScriptSource, GetUsing(fileContent), null);
-            }
+            scriptObject.ScriptSource.UsingCode = GetUsing(fileContent);
         }
 
         private static string GetUsing(string fileContent)
@@ -478,22 +471,12 @@ namespace StudioAvw.Gh.Parasites
             var output = new ScriptOutput
             {
                 InputOutput = methodArguments,
-                UniqueNamespace = "ns" + script.InstanceGuid.ToString().Replace("-", "").Substring(0, 5),
-                // Regex to fix the padding to match 4 tabs.
-                // somehow all code is still botched up. Not sure if I should use some other way to format code.
-                SourceCode = Regex.Replace(script.ScriptSource.ScriptCode, @"^( {4})( *)", @"            $2$2",
-                    RegexOptions.Multiline | RegexOptions.IgnoreCase),
-                AdditionalCode = Regex.Replace(script.ScriptSource.AdditionalCode, @"^( {2})( *)", @"        $2$2",
-                    RegexOptions.Multiline | RegexOptions.IgnoreCase),
+                UniqueNamespace = script.InstanceGuid.ToString().Replace("-", "").Substring(0, 5),
+                SourceCode = script.ScriptSource.ScriptCode,
+                Using = script.ScriptSource.UsingCode ?? "",
+                AdditionalCode = script.ScriptSource.AdditionalCode,
             };
 
-            var usingCode = script.ScriptSource.GetType()
-                .GetProperty("UsingCode")?
-                .GetValue(script.ScriptSource);
-            if (usingCode is string code)
-            {
-                output.CustomUsings = GetUsingList(code);
-            }
             var text = output.TransformText();
             try
             {
@@ -517,7 +500,6 @@ namespace StudioAvw.Gh.Parasites
             var elements = new List<string>();
             var map = BuildMap();
 
-            // todo: Add usings to script for RH6 support.
             foreach (var ghParam in script.Params.Input.OfType<Param_ScriptVariable>())
             {
                 var th = ghParam.TypeHint ?? new GH_NullHint();
@@ -556,12 +538,7 @@ namespace StudioAvw.Gh.Parasites
         private static string CleanNickname(string input)
         {
             var result = Regex.Match(input, @"\((.*)\)");
-            if (result.Success)
-            {
-                return result.Groups[1].Value;
-            }
-
-            return input;
+            return result.Success ? result.Groups[1].Value : input;
         }
 
         /// <summary>
@@ -648,7 +625,7 @@ namespace StudioAvw.Gh.Parasites
         /// <returns></returns>
         public static string GetRegion(string source, string regionName)
         {
-            var regex = @"#region |name|\s+(.*?)\s+#endregion".Replace("|name|", regionName);
+            var regex = @"#region |name|\r?\n?*?( *.*?)\r?\n?#endregion".Replace("|name|", regionName);
             var match = Regex.Match(source, regex, RegexOptions.Singleline);
             return match.Groups.Count >= 2 ? match.Groups[1].ToString() : "";
         }
@@ -693,6 +670,21 @@ namespace StudioAvw.Gh.Parasites
             }
 
             return true;
+        }
+
+        public void EnsureEditorConfig(string file)
+        {
+            var dir = Path.GetDirectoryName(file);
+
+            
+            var hasEditorConfig = Directory.GetFiles(dir).Any(s => s == ".editorconfig");
+
+            if (hasEditorConfig) return;
+            const string editorConfig = @"root = true
+[*.cs]
+indent_style = space
+indent_size = 2";
+            File.WriteAllText(file, editorConfig);
         }
 
         public void EnsureProject(string file)
