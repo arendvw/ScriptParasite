@@ -21,13 +21,13 @@ namespace StudioAvw.Gh.Parasites
     {
         /// <inheritdoc />
         public ScriptParasiteComponent() : base("Script Parasite", "ScriptPar",
-            "Allow C# scripts to edited in an external editor. Will recompile when the exported file changes.", "Math", "Scripts")
+            "Allow C# scripts to be edited in an external editor. Will recompile when the exported file changes.", "Math", "Scripts")
         {
             Message = "Disabled";
         }
 
         protected override Bitmap Icon => Resources.ScriptParasiteIcon;
-        
+
         public override GH_Exposure Exposure => GH_Exposure.tertiary;
 
         protected string DefaultOutputFolder
@@ -50,9 +50,11 @@ namespace StudioAvw.Gh.Parasites
         }
 
         protected string Folder { get; set; }
+        protected bool Watch { get; set; }
 
-        public override string Description => $"Allow C# scripts to edited in an external editor. Will recompile when the exported file changes, and will write parameter changes back to the C# script.\nCurrent output path: {DefaultOutputFolder}";
-
+        public override string Description => $"Allow C# scripts to be edited in an external editor. Will recompile when the exported file changes, and will write parameter and code changes back to the C# script automatically." +
+                                          $"\n\nCurrent output path: {DefaultOutputFolder}";
+        
         protected override string HelpDescription => $"Saved script output path: {DefaultOutputFolder}";
 
         protected string FileNameSafe
@@ -61,7 +63,7 @@ namespace StudioAvw.Gh.Parasites
             {
                 var name = Regex.Replace(TargetComponent.NickName, @"\W", "_");
                 var componentId = TargetComponent.InstanceGuid.ToString().Replace(" - ", "").Substring(0, 5);
-                return Path.Combine($"{Folder}",$"{name}-{componentId}.cs");
+                return Path.Combine($"{Folder}", $"{name}-{componentId}.cs");
             }
         }
 
@@ -73,13 +75,8 @@ namespace StudioAvw.Gh.Parasites
         {
             var defaultFolder = ReadDefaultFolder();
 
-            var enableParam = pManager.AddBooleanParameter("Enable", "E", "Enable listening for changes for the current file?",
-                GH_ParamAccess.tree, false);
-            pManager[enableParam].Optional = true;
-
-            var folderParam = pManager.AddTextParameter("Folder", "F", "Folder to write scripts to",
-                GH_ParamAccess.tree, defaultFolder);
-            pManager[folderParam].Optional = true;
+            pManager.AddBooleanParameter("Enable", "E", "Enable listening for changes for the current file?", GH_ParamAccess.item, false);
+            pManager.AddTextParameter("Folder", "F", "Folder to write scripts to", GH_ParamAccess.item, defaultFolder);
         }
 
         public static string SettingsFile => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -94,12 +91,12 @@ namespace StudioAvw.Gh.Parasites
         {
         }
 
-        private int _iteration;
+        //private int _iteration;
         private string _defaultFolder;
 
         protected override void BeforeSolveInstance()
         {
-            _iteration = 0;
+            //_iteration = 0;
         }
 
         protected override void SolveInstance(IGH_DataAccess da)
@@ -107,25 +104,24 @@ namespace StudioAvw.Gh.Parasites
             // reset everything, and let's start over..
             Cleanup();
             // things are botched up if this script runs more than once.
-            if (_iteration++ != 0) return;
-            if (!da.GetDataTree<GH_Boolean>(0, out var tree)) return;
-            if (!da.GetDataTree<GH_String>(1, out var stringTree)) return;
+            //if (_iteration++ != 0) return; not needed 
 
-            var folder = stringTree.AllData(true).OfType<GH_String>().Select(x => x.Value).FirstOrDefault();
+            bool watch = false;
+            string folder = "";
+
+            if (!da.GetData(0, ref watch)) return;
+            if (!da.GetData(1, ref folder)) return;
+
             if (folder == null)
             {
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Scripts Folder was not set");
                 return;
             }
-
             folder = folder.Trim();
 
             if (!TryGetDirectoryVerbose(folder)) return;
 
-            var allBooleans = tree.AllData(true).Select(c => c.ScriptVariable()).Cast<bool>().ToList();
-            var success = allBooleans.Count == 1 && allBooleans[0];
-
-            if (!success)
+            if (!watch)
             {
                 return;
             }
@@ -149,6 +145,7 @@ namespace StudioAvw.Gh.Parasites
 
 
             Folder = folder;
+            Watch = watch;
 
             string directory;
             string filename;
@@ -167,9 +164,8 @@ namespace StudioAvw.Gh.Parasites
                 return;
             }
 
-
             if (!WriteScriptToFile(TargetComponent, FileNameSafe)) return;
-            
+
             // Create a new FileSystemWatcher and set its properties.
             // http://stackoverflow.com/questions/721714/notification-when-a-file-changes
             AddEvents(directory, filename);
@@ -178,6 +174,9 @@ namespace StudioAvw.Gh.Parasites
 
             EnsureProject(Path.Combine(directory, "GrasshopperScripts.csproj"));
         }
+
+
+
 
         /// <summary>
         /// Write the "config" file (just a txt file), with the last successfully used setting.
@@ -245,7 +244,7 @@ namespace StudioAvw.Gh.Parasites
             var usingCodePropertyInfo = scriptObject.ScriptSource.GetType().GetProperty("UsingCode");
             var fileContent = ReadFile(filename);
             var runscript = GetRegion(fileContent, "Runscript");
-            var rsLines = runscript.Split(new[] {Environment.NewLine}, StringSplitOptions.None);
+            var rsLines = runscript.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
             runscript = string.Join(Environment.NewLine, rsLines.Skip(2).Take(rsLines.Length - 3).ToList());
             scriptObject.SourceCodeChanged(new GH_ScriptEditor(GH_ScriptLanguage.CS));
             var additional = GetRegion(fileContent, "Additional");
@@ -299,8 +298,9 @@ namespace StudioAvw.Gh.Parasites
                 return;
             }
 
-            TargetComponent.AttributesChanged += CurrentTargetOnAttributesChanged;
-            TargetComponent.ObjectChanged += CurrentTargetOnChanged;
+            TargetComponent.SolutionExpired += TargetComponent_SolutionExpired;
+            //  TargetComponent.AttributesChanged += CurrentTargetOnAttributesChanged;
+            // TargetComponent.ObjectChanged += CurrentTargetOnChanged;
 
             foreach (var item in TargetComponent.Params)
             {
@@ -315,9 +315,12 @@ namespace StudioAvw.Gh.Parasites
 
             Watcher.Changed += OnFileChanged;
             Watcher.Deleted += OnFileChanged;
+            Watcher.Created += OnFileChanged;
+            Watcher.Renamed += OnFileChanged;
             Watcher.EnableRaisingEvents = true;
             Message = "Watching";
         }
+
 
         private void CurrentTargetOnParamChanged(IGH_DocumentObject sender, GH_ObjectChangedEventArgs e)
         {
@@ -329,8 +332,9 @@ namespace StudioAvw.Gh.Parasites
         {
             if (TargetComponent != null)
             {
-                TargetComponent.AttributesChanged -= CurrentTargetOnAttributesChanged;
-                TargetComponent.ObjectChanged -= CurrentTargetOnChanged;
+                TargetComponent.SolutionExpired -= TargetComponent_SolutionExpired;
+                //TargetComponent.AttributesChanged -= CurrentTargetOnAttributesChanged;
+                // TargetComponent.ObjectChanged -= CurrentTargetOnChanged;
 
                 foreach (var item in TargetComponent.Params)
                 {
@@ -344,6 +348,8 @@ namespace StudioAvw.Gh.Parasites
                 return;
             Watcher.Changed -= OnFileChanged;
             Watcher.Deleted -= OnFileChanged;
+            Watcher.Created -= OnFileChanged;
+            Watcher.Renamed -= OnFileChanged;
             Watcher.Dispose();
             Watcher = null;
             Message = "Disabled";
@@ -366,8 +372,12 @@ namespace StudioAvw.Gh.Parasites
         {
             CheckAndUpdateExport(sender);
         }
-
         protected void CurrentTargetOnChanged(IGH_DocumentObject sender, GH_ObjectChangedEventArgs e)
+        {
+
+            CheckAndUpdateExport(sender);
+        }
+        private void TargetComponent_SolutionExpired(IGH_DocumentObject sender, GH_SolutionExpiredEventArgs e)
         {
             CheckAndUpdateExport(sender);
         }
@@ -379,9 +389,11 @@ namespace StudioAvw.Gh.Parasites
                 Cleanup();
                 return;
             }
-
+            
             if (IsBusy)
                 return;
+
+            // UpdateSourceFile();
 
             IsBusy = true;
             OnPingDocument().SolutionEnd += UpdateFileCallback;
@@ -393,7 +405,7 @@ namespace StudioAvw.Gh.Parasites
             if (!(sender is GH_Document doc)) return;
             doc.SolutionEnd -= UpdateFileCallback;
             ExpireSolution(false);
-            OnPingDocument().ScheduleSolution(100);
+            OnPingDocument().ScheduleSolution(60);
             IsBusy = false;
         }
 
@@ -474,17 +486,53 @@ namespace StudioAvw.Gh.Parasites
         /// <param name="filename"></param>
         private bool WriteScriptToFile(Component_CSNET_Script script, string filename)
         {
+
             var methodArguments = ExtractScriptParameters(script);
+
+            // read source as lines and add  tab space in front to compensate for the namespace directive
+            // also code part has 4 spaces at the begining and additioinal code has 2
+            // on first load there are 44 spaces for some reason?? 
+            var spaceTrimCount = script.ScriptSource.ScriptCode.TakeWhile(Char.IsWhiteSpace).Count();
+
+            StringBuilder formattedSource = new StringBuilder();
+            using (StringReader sr = new StringReader(script.ScriptSource.ScriptCode))
+            {
+                string line;
+                while ((line = sr.ReadLine()) != null)
+                {
+                    line = Regex.Replace(line, @"^\s{" + spaceTrimCount.ToString() + "}", "\t\t    ");
+                    // replace 2 with 4 spaces
+                    formattedSource.AppendLine(Regex.Replace(line, @"(\s{2})", "    "));
+                }
+            }
+
+
+            spaceTrimCount = script.ScriptSource.AdditionalCode.TakeWhile(Char.IsWhiteSpace).Count();
+
+            StringBuilder formattedAdditionalSource = new StringBuilder();
+            using (StringReader sr = new StringReader(script.ScriptSource.AdditionalCode))
+            {
+                string line;
+                while ((line = sr.ReadLine()) != null)
+                {
+                    line = Regex.Replace(line, @"^\s{" + spaceTrimCount.ToString() + "}", "\t    ");
+                    // replace 2 with 4 spaces
+                    formattedAdditionalSource.AppendLine(Regex.Replace(line, @"(\s{2})", "    "));
+                }
+            }
+
             var output = new ScriptOutput
             {
+
                 InputOutput = methodArguments,
                 UniqueNamespace = "ns" + script.InstanceGuid.ToString().Replace("-", "").Substring(0, 5),
+                Using = script.ScriptSource.UsingCode,
                 // Regex to fix the padding to match 4 tabs.
                 // somehow all code is still botched up. Not sure if I should use some other way to format code.
-                SourceCode = Regex.Replace(script.ScriptSource.ScriptCode, @"^( {4})( *)", @"            $2$2",
-                    RegexOptions.Multiline | RegexOptions.IgnoreCase),
-                AdditionalCode = Regex.Replace(script.ScriptSource.AdditionalCode, @"^( {2})( *)", @"        $2$2",
-                    RegexOptions.Multiline | RegexOptions.IgnoreCase),
+                SourceCode = formattedSource.ToString(), //Regex.Replace(script.ScriptSource.ScriptCode, @"^( {4})( *)", @"    $2$2",
+                                                         // RegexOptions.Multiline | RegexOptions.IgnoreCase),
+                AdditionalCode = formattedAdditionalSource.ToString(),//Regex.Replace(script.ScriptSource.AdditionalCode, @"^( {2})( *)", @"    $2$2",
+                                                                      // RegexOptions.Multiline | RegexOptions.IgnoreCase),
             };
 
             var usingCode = script.ScriptSource.GetType()
@@ -597,7 +645,7 @@ namespace StudioAvw.Gh.Parasites
         void AddMethod(Dictionary<string, string[]> map, string hint, string method, string ghgoo, string native,
             string nspace)
         {
-            map.Add(hint, new[] {method, ghgoo, native, nspace});
+            map.Add(hint, new[] { method, ghgoo, native, nspace });
         }
 
         /// <summary>
@@ -660,6 +708,7 @@ namespace StudioAvw.Gh.Parasites
         /// <returns>A list of objects of type T that belong to group T</returns>
         private List<T> FindObjectsOfTypeInCurrentGroup<T>() where T : IGH_ActiveObject
         {
+
             // find all groups that this object is in.
             var groups = OnPingDocument()
                 .Objects
