@@ -5,18 +5,18 @@ When enabled, the script parasite component watches the C# component it’s grou
 
 #### Installation
 
-    Rhino 6 using Package manager: using the command `TestPackageManager`, and select ScriptParasite
-    Rhino 7 using Package manager: Type the command `PackageManager`, and select ScriptParasite
-    Manual installation for all versions: Download the latest .zip file, and place in rhino's plugin and grasshopper component folder.
+- Rhino 6 using Package manager: using the command `TestPackageManager`, and select ScriptParasite
+- Rhino 7 using Package manager: Type the command `PackageManager`, and select ScriptParasite
+- Manual installation for all versions: Download the latest .zip file, and place in rhino's plugin and grasshopper component folder.
 
 #### Getting started
 
-    Add the script component in a group with the C# component you want to edit
-    Set enabled to true
-    Head over to your My Documents\GrasshopperScripts
-    With Visual Studio Code: Open the folder.
-    With Visual Studio Community or Rider, open the GrasshopperScripts.csproj file.
-    That’s it!
+1. Add the script component in a group with the C# component you want to edit
+2. Set enabled to true
+3. Head over to your My Documents\GrasshopperScripts
+4. With Visual Studio Code: Open the folder.
+5. With Visual Studio Community or Rider, open the GrasshopperScripts.csproj file.
+6. That’s it!
 
 #### Support
 For support regarding this plugin, please do not use the comments below, but use the grasshopper and rhino forum at discourse.mcneel.com with the tag scriptparasite.
