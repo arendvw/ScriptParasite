@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using Grasshopper.GUI.Script;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
@@ -123,7 +124,7 @@ namespace StudioAvw.Gh.Parasites
             if (!TryGetDirectoryVerbose(folder)) return;
 
             if (!watch)
-            {
+            { 
                 return;
             }
 
@@ -137,13 +138,7 @@ namespace StudioAvw.Gh.Parasites
                 return;
             }
 
-            if (IsBusy)
-            {
-                return;
-            }
-
             TargetComponent = scripts[0];
-
 
             Folder = folder;
 
@@ -278,66 +273,36 @@ namespace StudioAvw.Gh.Parasites
                 .Where(v => !defaults.Contains(v)).ToList();
         }
 
-        public FileSystemWatcher Watcher { get; set; }
+        public ScriptFilesystemWatcher Watcher { get; set; }
+
+        public ScriptComponentWatcher ComponentWatcher { get; set; }
 
         public void AddEvents(string directory, string filename)
         {
-            if (Watcher != null)
-            {
-                CleanUpEvents();
-            }
+            CleanUpEvents();
 
             if (TargetComponent == null)
             {
                 return;
             }
 
-            TargetComponent.AttributesChanged += CurrentTargetOnAttributesChanged;
-            TargetComponent.ObjectChanged += CurrentTargetOnChanged;
-
-            foreach (var item in TargetComponent.Params)
-            {
-                item.ObjectChanged -= CurrentTargetOnParamChanged;
-                item.ObjectChanged += CurrentTargetOnParamChanged;
-            }
-
-            Watcher = new FileSystemWatcher(directory, filename)
-            {
-                NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.CreationTime
-            };
-
-            Watcher.Changed += OnFileChanged;
-            Watcher.Deleted += OnFileChanged;
-            Watcher.EnableRaisingEvents = true;
+            ComponentWatcher = new ScriptComponentWatcher(TargetComponent);
+            ComponentWatcher.ScriptUpdated += ScriptUpdated;
+            Watcher = new ScriptFilesystemWatcher(directory, filename);
+            Watcher.FileUpdated += OnFileChanged;
             Message = "Watching";
         }
 
-        private void CurrentTargetOnParamChanged(IGH_DocumentObject sender, GH_ObjectChangedEventArgs e)
+        private async void ScriptUpdated(object sender, EventArgs e)
         {
-            var componentSender = sender.Attributes.GetTopLevel.DocObject;
-            CheckAndUpdateExport(componentSender);
+            await CheckAndUpdateExport();
         }
 
         public override void CleanUpEvents()
         {
-            if (TargetComponent != null)
-            {
-                TargetComponent.AttributesChanged -= CurrentTargetOnAttributesChanged;
-                TargetComponent.ObjectChanged -= CurrentTargetOnChanged;
-
-                foreach (var item in TargetComponent.Params)
-                {
-                    item.ObjectChanged -= CurrentTargetOnParamChanged;
-                }
-            }
-
-            TargetComponent = null;
-
-            if (Watcher == null)
-                return;
-            Watcher.Changed -= OnFileChanged;
-            Watcher.Deleted -= OnFileChanged;
-            Watcher.Dispose();
+            ComponentWatcher?.Dispose();
+            ComponentWatcher = null;
+            Watcher?.Dispose();
             Watcher = null;
             Message = "Disabled";
         }
@@ -354,46 +319,24 @@ namespace StudioAvw.Gh.Parasites
                    TargetComponent.OnPingDocument() == OnPingDocument();
         }
 
+        public bool IsWritingToFile { get; set; }
 
-        protected void CurrentTargetOnAttributesChanged(IGH_DocumentObject sender, GH_AttributesChangedEventArgs e)
+        private async Task CheckAndUpdateExport()
         {
-            CheckAndUpdateExport(sender);
-        }
-
-        protected void CurrentTargetOnChanged(IGH_DocumentObject sender, GH_ObjectChangedEventArgs e)
-        {
-            CheckAndUpdateExport(sender);
-        }
-
-        private void CheckAndUpdateExport(IGH_DocumentObject sender)
-        {
-            if (!ShouldContinue() || sender != TargetComponent)
+            if (!ShouldContinue())
             {
                 Cleanup();
                 return;
             }
 
-            if (IsBusy)
-                return;
-
-            IsBusy = true;
-            OnPingDocument().SolutionEnd += UpdateFileCallback;
+            Watcher.IsWriting = true;
+            WriteScriptToFile(TargetComponent, FileNameSafe);
+            await Task.Delay(50);
+            Watcher.IsWriting = false;
         }
 
-        private void UpdateFileCallback(object sender, GH_SolutionEventArgs e)
+        public async void OnFileChanged(Object sender, EventArgs eventArgs)
         {
-            if (!ShouldContinue()) return;
-            if (!(sender is GH_Document doc)) return;
-            doc.SolutionEnd -= UpdateFileCallback;
-            ExpireSolution(false);
-            OnPingDocument().ScheduleSolution(100);
-            IsBusy = false;
-        }
-
-        public void OnFileChanged(Object sender, FileSystemEventArgs e)
-        {
-            if (IsBusy) return;
-            IsBusy = true;
             try
             {
                 if (!ShouldContinue())
@@ -402,51 +345,32 @@ namespace StudioAvw.Gh.Parasites
                     return;
                 }
 
-                // Visual studio will rename a file to a temp file,
-                // Then write new contents to the original file
-                // So here we check if a file that stopped existing, starts existing again..
-                if (!File.Exists(FileNameSafe))
+                ComponentWatcher.IsUpdating = true;
+                var ghWatcher = new GrasshopperDocumentWatcher(OnPingDocument());
+                try
                 {
-                    Thread.Sleep(200);
-                    if (!File.Exists(FileNameSafe))
+                    await ghWatcher.WaitForSolutionEnd(10000);
+                    Grasshopper.Instances.DocumentEditor?.BeginInvoke((Action)(async () =>
                     {
-                        Cleanup();
-                        return;
-                    }
+                        WriteScriptToComponent(TargetComponent, FileNameSafe);
+                        TargetComponent.ExpireSolution(false);
+                        OnPingDocument().ScheduleSolution(10);
+                        await Task.Delay(50);
+                        ComponentWatcher.IsUpdating = false;
+                    }));
                 }
-
-                // Modify the script at the end of the solution, rather than now
-                // so we know for sure that nothing is in the middle of a 
-                // solution, and could botch up things.
-                OnPingDocument().SolutionEnd += WriteCodeToComponent;
-
-                OnPingDocument().ScheduleSolution(10, doc =>
+                catch (TimeoutException)
                 {
-                    // expire the script in the next solution, so it will recompute.
-                    TargetComponent.ExpireSolution(false);
-                });
+                    // do nothing..
+                    // grasshopper is still busy after 100 seconds..
+                    // time to bail out.
+                }
             }
             catch (Exception exp)
             {
                 RhinoApp.WriteLine($"Error in filehandler:{exp.Message}\\n{exp.StackTrace}");
             }
         }
-
-        private void WriteCodeToComponent(object sender, GH_SolutionEventArgs e)
-        {
-            if (!ShouldContinue()) return;
-            if (!(sender is GH_Document doc)) return;
-
-            doc.SolutionEnd -= WriteCodeToComponent;
-            WriteScriptToComponent(TargetComponent, FileNameSafe);
-            TargetComponent.ExpireSolution(true);
-            IsBusy = false;
-        }
-
-        /// <summary>
-        /// Happens if the file handler is busy
-        /// </summary>
-        public bool IsBusy { get; set; }
 
         /// <summary>
         /// Remove all events and status. Make sure there are no
@@ -455,7 +379,6 @@ namespace StudioAvw.Gh.Parasites
         public override void Cleanup()
         {
             CleanUpEvents();
-            IsBusy = false;
         }
 
 
@@ -625,7 +548,7 @@ namespace StudioAvw.Gh.Parasites
         /// <returns></returns>
         public static string GetRegion(string source, string regionName)
         {
-            var regex = @"#region |name|\r?\n?*?( *.*?)\r?\n?#endregion".Replace("|name|", regionName);
+            var regex = @"#region |name|\r?\n?\s*?( *.*?)\s*\r?\n?#endregion".Replace("|name|", regionName);
             var match = Regex.Match(source, regex, RegexOptions.Singleline);
             return match.Groups.Count >= 2 ? match.Groups[1].ToString() : "";
         }
@@ -705,5 +628,9 @@ indent_size = 2";
             };
             File.WriteAllText(file, output.TransformText());
         }
+    }
+
+    public class TimeoutException : Exception
+    {
     }
 }

@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>StudioAvw.Gh.Parasites</RootNamespace>
     <AssemblyName>ScriptParasite</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
@@ -34,20 +34,10 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Eto, Version=2.5.0.0, Culture=neutral, PublicKeyToken=552281e97c755530, processorArchitecture=MSIL">
-      <HintPath>packages\RhinoCommon.6.20.19322.20361\lib\net45\Eto.dll</HintPath>
-    </Reference>
-    <Reference Include="GH_IO">
-      <HintPath>..\..\..\..\..\Program Files\Rhino 7\Plug-ins\Grasshopper\GH_IO.dll</HintPath>
-    </Reference>
-    <Reference Include="Grasshopper">
-      <HintPath>..\..\..\..\..\Program Files\Rhino 7\Plug-ins\Grasshopper\Grasshopper.dll</HintPath>
-    </Reference>
-    <Reference Include="RhinoCommon">
-      <HintPath>..\..\..\..\..\Program Files\Rhino 7\System\RhinoCommon.dll</HintPath>
-    </Reference>
-    <Reference Include="Script">
-      <HintPath>..\..\..\..\..\Program Files\Rhino 7\Plug-ins\Grasshopper\Components\Script.dll</HintPath>
+    <Reference Include="ScriptComponents, Version=6.33.20343.16431, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>.\ScriptComponents.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -61,6 +51,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DebounceHelper.cs" />
+    <Compile Include="ScriptComponentWatcher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -73,6 +65,8 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
+    <Compile Include="GrasshopperDocumentWatcher.cs" />
+    <Compile Include="ScriptFilesystemWatcher.cs" />
     <Compile Include="ScriptOutput.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -96,7 +90,6 @@
     </Content>
     <None Include="manifest.yml" />
     <None Include="icon.psd" />
-    <None Include="packages.config" />
     <None Include="release.ps1" />
     <None Include="ScriptParasite.png" />
     <None Include="script\deploy.ps1" />
@@ -114,18 +107,14 @@
   <ItemGroup>
     <Folder Include="dist\" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Grasshopper">
+      <Version>6.35.21222.17001</Version>
+    </PackageReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>Copy "$(TargetPath)" "$(TargetDir)$(ProjectName).gha"
 Erase "$(TargetPath)"</PostBuildEvent>
   </PropertyGroup>
-  <Import Project="packages\RhinoCommon.6.20.19322.20361\build\net45\RhinoCommon.targets" Condition="Exists('packages\RhinoCommon.6.20.19322.20361\build\net45\RhinoCommon.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('packages\RhinoCommon.6.20.19322.20361\build\net45\RhinoCommon.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\RhinoCommon.6.20.19322.20361\build\net45\RhinoCommon.targets'))" />
-    <Error Condition="!Exists('packages\Grasshopper.6.20.19322.20361\build\net45\Grasshopper.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Grasshopper.6.20.19322.20361\build\net45\Grasshopper.targets'))" />
-  </Target>
-  <Import Project="packages\Grasshopper.6.20.19322.20361\build\net45\Grasshopper.targets" Condition="Exists('packages\Grasshopper.6.20.19322.20361\build\net45\Grasshopper.targets')" />
 </Project>
