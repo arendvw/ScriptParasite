@@ -1,10 +1,10 @@
 ﻿### 
 ### ALL FiLES TO EXPORT  AFTER BUILD
 ###
+
+### TO USE: Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope LocalMachine
 $namePrefix = "ScriptParasite"
-$projects = "."
-$projectFile = "ScriptParasite.csproj"
-$copyToOutput =".\bin\Release\ScriptParasite.gha",
+$copyToOutput = ".\bin\Release\ScriptParasite.gha",
 ".\bin\Release\ScriptParasite.pdb"
 
 # Where is the grasshopper assembly file?
@@ -144,10 +144,10 @@ function EnsureYak($yakLocation)
 
 
 Push-Location $PSScriptRoot;
+$projectRoot = $PSScriptRoot;
 
-$file = "$($projects[0])\Properties\AssemblyInfo.cs"
-Write-Host $file;
-$yak = "$PSScriptRoot\yak.exe"
+$file = "$($projectRoot)\Properties\AssemblyInfo.cs"
+$yak = "$($projectRoot)\yak.exe"
 EnsureYak($yak)
 $version = GetCurrentVersion $file
 $newVersion = IncrementVersion $version 0 0 1
@@ -156,7 +156,7 @@ Write-Host $confirm
 if (-Not ([string]::IsNullOrEmpty($confirm)) -and $confirm -ne 'y') {
     $newVersionInput = Read-Host -Prompt "Enter new version number"
     try {
-    $newVersion = [Version]::new($newVersionInput);   $newVersion = [Version]::new($newVersionInput);
+        $newVersion = [Version]::new($newVersionInput);   $newVersion = [Version]::new($newVersionInput);
     } catch {
         Write-Error "Invalid version"
         exit
@@ -164,7 +164,7 @@ if (-Not ([string]::IsNullOrEmpty($confirm)) -and $confirm -ne 'y') {
 }
 
 ## Update the yak manifest
-$manifestFile = "./manifest.yml"
+$manifestFile = "$($projectRoot)/manifest.yml"
 $yakVersion = "$($newVersion.Major).$($newVersion.Minor).$($newVersion.Build)";
 (Get-Content $manifestFile) -replace "version:\s*\S+", "version: $yakVersion" | Set-Content $manifestFile
 
@@ -174,12 +174,28 @@ $yakVersion = "$($newVersion.Major).$($newVersion.Minor).$($newVersion.Build)";
 
 ## Update
 ## *\AssemblyInfo.cs
-foreach ($project in $projects) {
-     UpdateVersion "$($project)\Properties\AssemblyInfo.cs" $yakVersion
-     # Force clean of project
-     Remove-Item -path "$($project)\bin\*" -recurse 
-     Remove-Item -path "$($project)\obj\*" -recurse 
+UpdateVersion "$($projectRoot)\Properties\AssemblyInfo.cs" $yakVersion
+# Force clean of project
+if (-Not (Test-Path "$($projectRoot)\bin"))
+{
+    New-Item -Path "$($projectRoot)" -Name "bin" -ItemType "directory"
 }
+if (-Not (Test-Path "$($projectRoot)\obj"))
+{
+    New-Item -Path "$($projectRoot)" -Name "obj" -ItemType "directory"
+}
+if (-Not (Test-Path "$($projectRoot)\dist"))
+{
+    New-Item -Path "$($projectRoot)" -Name "dist" -ItemType "directory"
+}
+if (-Not (Test-Path "$($projectRoot)\output"))
+{
+    New-Item -Path "$($projectRoot)" -Name "output" -ItemType "directory"
+}
+
+Remove-Item -path "$($projectRoot)\bin\*" -recurse 
+Remove-Item -path "$($projectRoot)\obj\*" -recurse 
+Remove-Item -path "$($projectRoot)\dist\*" -recurse 
 
 Write-Host "Building new version.."
 ## Build a new version
@@ -194,36 +210,44 @@ if ($null -eq $result) {
 
 Write-Host "Packaging new version.."
 # Create empty temporary folder
-$temp = ".\dist"
-$output = '.\output';
-if (Test-Path $temp)
-{
-    $a = Remove-Item -path $temp -recurse 
-}
-$a = New-Item -Path . -Name $temp -ItemType "directory"
+$temp = "$($projectRoot)\dist\ScriptParasite.rhp"
+$tempMacRhi = "$($projectRoot)\dist"
+$output = "$($projectRoot)\output";
+New-Item -Path $projectRoot -Name "dist\ScriptParasite.rhp" -ItemType "directory"
 if (-Not (Test-Path $output))
 {
-    $a = New-Item -Path . -Name $output -ItemType "directory"
+    $noOutput = New-Item -Path $projectRoot -Name "output" -ItemType "directory"
 }
 
 foreach ($item in $copyToOutput) {
     Copy-Item $item $temp
 }
 
-Write-Host "Packaging zip version.."
-$outputZip =  ".\$($namePrefix)-$($yakversion).zip";
-Compress-Archive -Path "$($temp)/*" -DestinationPath $outputZip
+$outputZip =  "$($projectRoot)\$($namePrefix)-$($yakversion).zip";
+$outputRhi =  "$($projectRoot)\$($namePrefix)-$($yakversion).rhi"
+$outputZipMacRhi =  "$($projectRoot)\$($namePrefix)-$($yakversion).macrhi.zip"
+$outputMacRhi =  "$($projectRoot)\$($namePrefix)-$($yakversion).macrhi"
 
 Write-Host "Packaging yak version.."
 Copy-Item $manifestFile $temp
 Push-Location $temp
-$a = & "$PSScriptRoot\yak.exe" build
+Write-Host $temp;
+$a = & "$($projectRoot)\yak.exe" build
 Write-Host $a;
 Pop-Location
 
 $yakfile = Get-ChildItem -recurse -Path $temp -Filter *.yak | Select-Object -First 1
 Move-Item $($yakfile.FullName) $output
+
+Write-Host "Packaging (mac)rhi version.."
+# Create RHI Installer (zip package)
+Compress-Archive -Path "$($temp)/*" -DestinationPath $outputZip
+Compress-Archive -Path "$($tempMacRhi)/*" -DestinationPath $outputZipMacRhi
 Copy-Item $outputZip $output
+Move-Item $outputZip $outputRhi
+Move-Item $outputRhi $output
+Move-Item $outputZipMacRhi $outputMacRhi
+Move-Item $outputMacRhi $output
 Pop-Location;
 
-Write-Host "Done. If you wish to publish the yak file, use the command  .\yak.exe push .\$($output)\$($yakfile)"
+Write-Host "Done. If you wish to publish the yak file, use the command  .\yak.exe push $($projectRoot)\$($output)\$($yakfile)"
