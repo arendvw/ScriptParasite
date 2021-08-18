@@ -28,7 +28,7 @@ namespace StudioAvw.Gh.Parasites
         /// </summary>
         public virtual string TransformText()
         {
-            this.Write(@"
+    this.Write(@"
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -41,11 +41,11 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
 
-// Non-default includes.
-");
+// Non-default includes
+            ");
             
             #line 20 "C:\Users\anchan\source\repos\ScriptParasite\ScriptOutput.tt"
- foreach (string usingName in CustomUsings) { 
+    foreach (string usingName in CustomUsings) { 
             
             #line default
             #line hidden
@@ -59,7 +59,7 @@ using Grasshopper.Kernel.Types;
             this.Write(";\r\n");
             
             #line 22 "C:\Users\anchan\source\repos\ScriptParasite\ScriptOutput.tt"
- } 
+    } 
             
             #line default
             #line hidden
@@ -71,43 +71,71 @@ using Grasshopper.Kernel.Types;
             
             #line default
             #line hidden
+            // This is full text before Run scrip with all summaris
+            //this.Write("\r\n{\r\n    /// <summary>\r\n    /// This class will be instantiated on demand by the " +
+            //        "Script component.\r\n    /// </summary>\r\n    public class Script_Instance : GH_Scr" +
+            //        "iptInstance\r\n    {\r\n\t    /// This method is added to prevent compiler errors whe" +
+            //        "n opening this file in visual studio (code) or rider.\r\n\t    public override void" +
+            //        " InvokeRunScript(IGH_Component owner, object rhinoDocument, int iteration, List<" +
+            //        "object> inputs, IGH_DataAccess DA)\r\n        {\r\n            throw new NotImplemen" +
+            //        "tedException();\r\n        }\r\n\r\n        #region Utility functions\r\n        /// <su" +
+            //        "mmary>Print a String to the [Out] Parameter of the Script component.</summary>\r\n" +
+            //        "        /// <param name=\"text\">String to print.</param>\r\n        private void Pr" +
+            //        "int(string text) { /* Implementation hidden. */ }\r\n        /// <summary>Print a " +
+            //        "formatted String to the [Out] Parameter of the Script component.</summary>\r\n    " +
+            //        "    /// <param name=\"format\">String format.</param>\r\n        /// <param name=\"ar" +
+            //        "gs\">Formatting parameters.</param>\r\n        private void Print(string format, pa" +
+            //        "rams object[] args) { /* Implementation hidden. */ }\r\n        /// <summary>Print" +
+            //        " useful information about an object instance to the [Out] Parameter of the Scrip" +
+            //        "t component. </summary>\r\n        /// <param name=\"obj\">Object instance to parse." +
+            //        "</param>\r\n        private void Reflect(object obj) { /* Implementation hidden. *" +
+            //        "/ }\r\n        /// <summary>Print the signatures of all the overloads of a specifi" +
+            //        "c method to the [Out] Parameter of the Script component. </summary>\r\n        ///" +
+            //        " <param name=\"obj\">Object instance to parse.</param>\r\n        private void Refle" +
+            //        "ct(object obj, string method_name) { /* Implementation hidden. */ }\r\n        #en" +
+            //        "dregion\r\n        #region Members\r\n        /// <summary>Gets the current Rhino do" +
+            //        "cument.</summary>\r\n        private readonly RhinoDoc RhinoDocument;\r\n        ///" +
+            //        " <summary>Gets the Grasshopper document that owns this script.</summary>\r\n      " +
+            //        "  private readonly GH_Document GrasshopperDocument;\r\n        /// <summary>Gets t" +
+            //        "he Grasshopper script component that owns this script.</summary>\r\n        privat" +
+            //        "e readonly IGH_Component Component;\r\n        /// <summary>\r\n        /// Gets the" +
+            //        " current iteration count. The first call to RunScript() is associated with Itera" +
+            //        "tion==0.\r\n        /// Any subsequent call within the same solution will incremen" +
+            //        "t the Iteration count.\r\n        /// </summary>\r\n        private readonly int Ite" +
+            //        "ration;\r\n        #endregion\r\n        /// <summary>\r\n        /// This procedure c" +
+            //        "ontains the user code. Input parameters are provided as regular arguments,\r\n    " +
+            //        "    /// Output parameters as ref arguments. You don\'t have to assign output para" +
+            //        "meters,\r\n        /// they will have a default value.\r\n        /// </summary>\r\n  " +
+            //        "      #region Runscript\r\n        private void RunScript(");
+
+            // this is the short text without comments so it will give accurate line when debugging 
             this.Write("\r\n{\r\n    /// <summary>\r\n    /// This class will be instantiated on demand by the " +
-                    "Script component.\r\n    /// </summary>\r\n    public class Script_Instance : GH_Scr" +
-                    "iptInstance\r\n    {\r\n\t    /// This method is added to prevent compiler errors whe" +
-                    "n opening this file in visual studio (code) or rider.\r\n\t    public override void" +
-                    " InvokeRunScript(IGH_Component owner, object rhinoDocument, int iteration, List<" +
-                    "object> inputs, IGH_DataAccess DA)\r\n        {\r\n            throw new NotImplemen" +
-                    "tedException();\r\n        }\r\n\r\n        #region Utility functions\r\n        /// <su" +
-                    "mmary>Print a String to the [Out] Parameter of the Script component.</summary>\r\n" +
-                    "        /// <param name=\"text\">String to print.</param>\r\n        private void Pr" +
-                    "int(string text) { /* Implementation hidden. */ }\r\n        /// <summary>Print a " +
-                    "formatted String to the [Out] Parameter of the Script component.</summary>\r\n    " +
-                    "    /// <param name=\"format\">String format.</param>\r\n        /// <param name=\"ar" +
-                    "gs\">Formatting parameters.</param>\r\n        private void Print(string format, pa" +
-                    "rams object[] args) { /* Implementation hidden. */ }\r\n        /// <summary>Print" +
-                    " useful information about an object instance to the [Out] Parameter of the Scrip" +
-                    "t component. </summary>\r\n        /// <param name=\"obj\">Object instance to parse." +
-                    "</param>\r\n        private void Reflect(object obj) { /* Implementation hidden. *" +
-                    "/ }\r\n        /// <summary>Print the signatures of all the overloads of a specifi" +
-                    "c method to the [Out] Parameter of the Script component. </summary>\r\n        ///" +
-                    " <param name=\"obj\">Object instance to parse.</param>\r\n        private void Refle" +
-                    "ct(object obj, string method_name) { /* Implementation hidden. */ }\r\n        #en" +
-                    "dregion\r\n        #region Members\r\n        /// <summary>Gets the current Rhino do" +
-                    "cument.</summary>\r\n        private readonly RhinoDoc RhinoDocument;\r\n        ///" +
-                    " <summary>Gets the Grasshopper document that owns this script.</summary>\r\n      " +
-                    "  private readonly GH_Document GrasshopperDocument;\r\n        /// <summary>Gets t" +
-                    "he Grasshopper script component that owns this script.</summary>\r\n        privat" +
-                    "e readonly IGH_Component Component;\r\n        /// <summary>\r\n        /// Gets the" +
-                    " current iteration count. The first call to RunScript() is associated with Itera" +
-                    "tion==0.\r\n        /// Any subsequent call within the same solution will incremen" +
-                    "t the Iteration count.\r\n        /// </summary>\r\n        private readonly int Ite" +
-                    "ration;\r\n        #endregion\r\n        /// <summary>\r\n        /// This procedure c" +
-                    "ontains the user code. Input parameters are provided as regular arguments,\r\n    " +
-                    "    /// Output parameters as ref arguments. You don\'t have to assign output para" +
-                    "meters,\r\n        /// they will have a default value.\r\n        /// </summary>\r\n  " +
-                    "      #region Runscript\r\n        private void RunScript(");
-            
-            #line 72 "C:\Users\anchan\source\repos\ScriptParasite\ScriptOutput.tt"
+                 "Script component.\r\n    /// </summary>\r\n    public class Script_Instance : GH_Scr" +
+                 "iptInstance\r\n    {\r\n\t    /// This method is added to prevent compiler errors whe" +
+                 "n opening this file in visual studio (code) or rider.\r\n\t    public override void" +
+                 " InvokeRunScript(IGH_Component owner, object rhinoDocument, int iteration, List<" +
+                 "object> inputs, IGH_DataAccess DA)\r\n        {\r\n            throw new NotImplemen" +
+                 "tedException();\r\n        }\r\n\r\n        #region Utility functions\r\n        private void Pr" +
+                 "int(string text) { /* Implementation hidden. */ }\r\n        private void Print(string format, pa" +
+                 "rams object[] args) { /* Implementation hidden. */ }\r\n        private void Reflect(object obj) { /* Implementation hidden. *" +
+                 "/ }\r\n        private void Refle" +
+                 "ct(object obj, string method_name) { /* Implementation hidden. */ }\r\n        #en" +
+                 "dregion\r\n        #region Members\r\n        /// <summary>Gets the current Rhino do" +
+                 "cument.</summary>\r\n        private readonly RhinoDoc RhinoDocument;\r\n        ///" +
+                 " <summary>Gets the Grasshopper document that owns this script.</summary>\r\n      " +
+                 "  private readonly GH_Document GrasshopperDocument;\r\n        /// <summary>Gets t" +
+                 "he Grasshopper script component that owns this script.</summary>\r\n        privat" +
+                 "e readonly IGH_Component Component;\r\n        /// <summary>\r\n        /// Gets the" +
+                 " current iteration count. The first call to RunScript() is associated with Itera" +
+                 "tion==0.\r\n        /// Any subsequent call within the same solution will incremen" +
+                 "t the Iteration count.\r\n        /// </summary>\r\n        private readonly int Ite" +
+                 "ration;\r\n        #endregion\r\n        /// <summary>\r\n        /// This procedure c" +
+                 "ontains the user code. Input parameters are provided as regular arguments,\r\n    " +
+                 "    /// Output parameters as ref arguments. You don\'t have to assign output para" +
+                 "meters,\r\n        /// they will have a default value.\r\n        /// </summary>\r\n  " +
+                 "      #region Runscript\r\n        private void RunScript(");
+
+#line 72 "C:\Users\anchan\source\repos\ScriptParasite\ScriptOutput.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(InputOutput));
             
             #line default
@@ -119,7 +147,7 @@ using Grasshopper.Kernel.Types;
             
             #line default
             #line hidden
-            this.Write("\r\n        }\r\n        #endregion\r\n\r\n        #region Additional\r\n");
+            this.Write("\r\n        }\r\n        #endregion\r\n        #region Additional\r\n");
             
             #line 79 "C:\Users\anchan\source\repos\ScriptParasite\ScriptOutput.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(AdditionalCode));

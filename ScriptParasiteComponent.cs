@@ -14,6 +14,7 @@ using Grasshopper.Kernel.Special;
 using Grasshopper.Kernel.Types;
 using Rhino;
 using ScriptComponents;
+using System.Windows.Forms;
 
 namespace StudioAvw.Gh.Parasites
 {
@@ -24,7 +25,12 @@ namespace StudioAvw.Gh.Parasites
             "Allow C# scripts to be edited in an external editor. Will recompile when the exported file changes.", "Math", "Scripts")
         {
             Message = "Disabled";
+            UsingHash = "";
+            SourceHash = "";
+            AdditionalHash = "";
+            AttributeTrigger = false;
         }
+
 
         protected override Bitmap Icon => Resources.ScriptParasiteIcon;
 
@@ -52,6 +58,11 @@ namespace StudioAvw.Gh.Parasites
         protected string Folder { get; set; }
         protected bool Watch { get; set; }
 
+        protected string UsingHash { get; set; }
+        protected string SourceHash { get; set; }
+        protected string AdditionalHash { get; set; }
+        protected bool AttributeTrigger { get; set; }
+
         public override string Description => $"Allow C# scripts to be edited in an external editor. Will recompile when the exported file changes, and will write parameter and code changes back to the C# script automatically." +
                                           $"\n\nCurrent output path: {DefaultOutputFolder}";
         
@@ -61,9 +72,16 @@ namespace StudioAvw.Gh.Parasites
         {
             get
             {
+                return Path.Combine($"{Folder}", $"{NameSafe}.cs");
+            }
+        }
+        protected string NameSafe
+        {
+            get
+            {
                 var name = Regex.Replace(TargetComponent.NickName, @"\W", "_");
                 var componentId = TargetComponent.InstanceGuid.ToString().Replace(" - ", "").Substring(0, 5);
-                return Path.Combine($"{Folder}", $"{name}-{componentId}.cs");
+                return $"{name}_{componentId}";
             }
         }
 
@@ -96,7 +114,7 @@ namespace StudioAvw.Gh.Parasites
 
         protected override void BeforeSolveInstance()
         {
-            //_iteration = 0;
+           
         }
 
         protected override void SolveInstance(IGH_DataAccess da)
@@ -143,7 +161,7 @@ namespace StudioAvw.Gh.Parasites
 
             TargetComponent = scripts[0];
 
-
+            NickName = TargetComponent.InstanceGuid.ToString().Replace(" - ", "").Substring(0, 5);
             Folder = folder;
             Watch = watch;
 
@@ -168,14 +186,13 @@ namespace StudioAvw.Gh.Parasites
 
             // Create a new FileSystemWatcher and set its properties.
             // http://stackoverflow.com/questions/721714/notification-when-a-file-changes
+            // and this -> https://stackoverflow.com/questions/680698/why-doesnt-filesystemwatcher-detect-changes-from-visual-studio#681078
             AddEvents(directory, filename);
 
             WriteDefaultConfig(directory);
 
             EnsureProject(Path.Combine(directory, "GrasshopperScripts.csproj"));
         }
-
-
 
 
         /// <summary>
@@ -277,6 +294,7 @@ namespace StudioAvw.Gh.Parasites
                 "Rhino", "Rhino.Geometry", "Grasshopper", "Grasshopper.Kernel",
                 "Grasshopper.Kernel.Data", "Grasshopper.Kernel.Types",
             }.ToList();
+
             // \s([0-9a-zA-Z\._]+);$
             return Regex.Matches(fileContent, @"using\s+([0-9a-zA-Z\._=<>\ ]+);")
                 .OfType<Match>()
@@ -299,8 +317,8 @@ namespace StudioAvw.Gh.Parasites
             }
 
             TargetComponent.SolutionExpired += TargetComponent_SolutionExpired;
-            //  TargetComponent.AttributesChanged += CurrentTargetOnAttributesChanged;
-            // TargetComponent.ObjectChanged += CurrentTargetOnChanged;
+            TargetComponent.AttributesChanged += CurrentTargetOnAttributesChanged;
+            TargetComponent.ObjectChanged += CurrentTargetOnChanged;
 
             foreach (var item in TargetComponent.Params)
             {
@@ -318,14 +336,16 @@ namespace StudioAvw.Gh.Parasites
             Watcher.Created += OnFileChanged;
             Watcher.Renamed += OnFileChanged;
             Watcher.EnableRaisingEvents = true;
+
+
             Message = "Watching";
         }
 
-
         private void CurrentTargetOnParamChanged(IGH_DocumentObject sender, GH_ObjectChangedEventArgs e)
         {
-            var componentSender = sender.Attributes.GetTopLevel.DocObject;
-            CheckAndUpdateExport(componentSender);
+            AttributeTrigger = true;
+            //var componentSender = sender.Attributes.GetTopLevel.DocObject;
+            //CheckAndUpdateExport(componentSender);
         }
 
         public override void CleanUpEvents()
@@ -333,8 +353,8 @@ namespace StudioAvw.Gh.Parasites
             if (TargetComponent != null)
             {
                 TargetComponent.SolutionExpired -= TargetComponent_SolutionExpired;
-                //TargetComponent.AttributesChanged -= CurrentTargetOnAttributesChanged;
-                // TargetComponent.ObjectChanged -= CurrentTargetOnChanged;
+                TargetComponent.AttributesChanged -= CurrentTargetOnAttributesChanged;
+                TargetComponent.ObjectChanged -= CurrentTargetOnChanged;
 
                 foreach (var item in TargetComponent.Params)
                 {
@@ -370,12 +390,13 @@ namespace StudioAvw.Gh.Parasites
 
         protected void CurrentTargetOnAttributesChanged(IGH_DocumentObject sender, GH_AttributesChangedEventArgs e)
         {
-            CheckAndUpdateExport(sender);
+            AttributeTrigger = true;
+            //CheckAndUpdateExport(sender);
         }
         protected void CurrentTargetOnChanged(IGH_DocumentObject sender, GH_ObjectChangedEventArgs e)
         {
-
-            CheckAndUpdateExport(sender);
+            AttributeTrigger = true;
+            //CheckAndUpdateExport(sender);
         }
         private void TargetComponent_SolutionExpired(IGH_DocumentObject sender, GH_SolutionExpiredEventArgs e)
         {
@@ -392,8 +413,6 @@ namespace StudioAvw.Gh.Parasites
             
             if (IsBusy)
                 return;
-
-            // UpdateSourceFile();
 
             IsBusy = true;
             OnPingDocument().SolutionEnd += UpdateFileCallback;
@@ -421,18 +440,20 @@ namespace StudioAvw.Gh.Parasites
                     return;
                 }
 
-                // Visual studio will rename a file to a temp file,
-                // Then write new contents to the original file
-                // So here we check if a file that stopped existing, starts existing again..
-                if (!File.Exists(FileNameSafe))
-                {
-                    Thread.Sleep(200);
-                    if (!File.Exists(FileNameSafe))
-                    {
-                        Cleanup();
-                        return;
-                    }
-                }
+                /// not needed 
+                /// 
+                //// Visual studio will rename a file to a temp file,
+                //// Then write new contents to the original file
+                //// So here we check if a file that stopped existing, starts existing again..
+                //if (!File.Exists(FileNameSafe))
+                //{
+                //    Thread.Sleep(200);
+                //    if (!File.Exists(FileNameSafe))
+                //    {
+                //        Cleanup();
+                //        return;
+                //    }
+                //}
 
                 // Modify the script at the end of the solution, rather than now
                 // so we know for sure that nothing is in the middle of a 
@@ -458,6 +479,7 @@ namespace StudioAvw.Gh.Parasites
 
             doc.SolutionEnd -= WriteCodeToComponent;
             WriteScriptToComponent(TargetComponent, FileNameSafe);
+            AttributeTrigger = false;
             TargetComponent.ExpireSolution(true);
             IsBusy = false;
         }
@@ -486,72 +508,95 @@ namespace StudioAvw.Gh.Parasites
         /// <param name="filename"></param>
         private bool WriteScriptToFile(Component_CSNET_Script script, string filename)
         {
+            //only write the changed files and skipp attribute changes so that disk wear is decreased
+            var usingHash = GetStringSha256Hash(script.ScriptSource.UsingCode);
+            var sourceHash = GetStringSha256Hash(script.ScriptSource.ScriptCode);
+            var additionalHash = GetStringSha256Hash(script.ScriptSource.AdditionalCode);
 
-            var methodArguments = ExtractScriptParameters(script);
-
-            // read source as lines and add  tab space in front to compensate for the namespace directive
-            // also code part has 4 spaces at the begining and additioinal code has 2
-            // on first load there are 44 spaces for some reason?? 
-            var spaceTrimCount = script.ScriptSource.ScriptCode.TakeWhile(Char.IsWhiteSpace).Count();
-
-            StringBuilder formattedSource = new StringBuilder();
-            using (StringReader sr = new StringReader(script.ScriptSource.ScriptCode))
+            // always change on attribute modification
+            if (AttributeTrigger || usingHash != UsingHash || sourceHash != SourceHash || additionalHash != AdditionalHash)
             {
-                string line;
-                while ((line = sr.ReadLine()) != null)
+
+                // save for next run
+                UsingHash = usingHash;
+                SourceHash = sourceHash;
+                AdditionalHash = additionalHash;
+
+
+                var methodArguments = ExtractScriptParameters(script);
+
+                // Read source as lines and add tab space in front to compensate for the namespace directive
+                // also code part has 4 spaces at the begining and additioinal code has 2
+                // on first load there are 44 spaces for some reason?? We have to remove all and then expand to four spaces.
+                var spaceTrimCount = script.ScriptSource.ScriptCode.TakeWhile(Char.IsWhiteSpace).Count();
+
+                StringBuilder formattedSource = new StringBuilder();
+                using (StringReader sr = new StringReader(script.ScriptSource.ScriptCode))
                 {
-                    line = Regex.Replace(line, @"^\s{" + spaceTrimCount.ToString() + "}", "\t\t    ");
-                    // replace 2 with 4 spaces
-                    formattedSource.AppendLine(Regex.Replace(line, @"(\s{2})", "    "));
+                    string line;
+                    while ((line = sr.ReadLine()) != null)
+                    {
+                        line = Regex.Replace(line, @"^\s{" + spaceTrimCount.ToString() + "}", "\t\t    ");
+                        // replace 2 with 4 spaces
+                        formattedSource.AppendLine(Regex.Replace(line, @"(\s{2})", "    "));
+                    }
+                }
+
+                spaceTrimCount = script.ScriptSource.AdditionalCode.TakeWhile(Char.IsWhiteSpace).Count();
+
+                StringBuilder formattedAdditionalSource = new StringBuilder();
+                using (StringReader sr = new StringReader(script.ScriptSource.AdditionalCode))
+                {
+                    string line;
+                    while ((line = sr.ReadLine()) != null)
+                    {
+                        // use tab and 3 spaces? this seems to have worked with 4
+                        line = Regex.Replace(line, @"^\s{" + spaceTrimCount.ToString() + "}", "\t   ");
+                        // replace 2 with 4 spaces
+                        formattedAdditionalSource.AppendLine(Regex.Replace(line, @"(\s{2})", "    "));
+                    }
+                }
+
+                var output = new ScriptOutput
+                {
+                    InputOutput = methodArguments,
+                    UniqueNamespace = NameSafe,
+                    CustomUsings = GetUsingList(script.ScriptSource.UsingCode),
+                    SourceCode = formattedSource.ToString(),
+                    AdditionalCode = formattedAdditionalSource.ToString(),
+                };
+
+
+                var text = output.TransformText();
+                try
+                {
+                    File.WriteAllText(filename, text);
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Could not write script to file {filename}, error: {ex.Message}");
+                    return false;
                 }
             }
-
-
-            spaceTrimCount = script.ScriptSource.AdditionalCode.TakeWhile(Char.IsWhiteSpace).Count();
-
-            StringBuilder formattedAdditionalSource = new StringBuilder();
-            using (StringReader sr = new StringReader(script.ScriptSource.AdditionalCode))
-            {
-                string line;
-                while ((line = sr.ReadLine()) != null)
-                {
-                    line = Regex.Replace(line, @"^\s{" + spaceTrimCount.ToString() + "}", "\t    ");
-                    // replace 2 with 4 spaces
-                    formattedAdditionalSource.AppendLine(Regex.Replace(line, @"(\s{2})", "    "));
-                }
-            }
-
-            var output = new ScriptOutput
-            {
-
-                InputOutput = methodArguments,
-                UniqueNamespace = "ns" + script.InstanceGuid.ToString().Replace("-", "").Substring(0, 5),
-                Using = script.ScriptSource.UsingCode,
-                // Regex to fix the padding to match 4 tabs.
-                // somehow all code is still botched up. Not sure if I should use some other way to format code.
-                SourceCode = formattedSource.ToString(), //Regex.Replace(script.ScriptSource.ScriptCode, @"^( {4})( *)", @"    $2$2",
-                                                         // RegexOptions.Multiline | RegexOptions.IgnoreCase),
-                AdditionalCode = formattedAdditionalSource.ToString(),//Regex.Replace(script.ScriptSource.AdditionalCode, @"^( {2})( *)", @"    $2$2",
-                                                                      // RegexOptions.Multiline | RegexOptions.IgnoreCase),
-            };
-
-            var usingCode = script.ScriptSource.GetType()
-                .GetProperty("UsingCode")?
-                .GetValue(script.ScriptSource);
-            if (usingCode is string code)
-            {
-                output.CustomUsings = GetUsingList(code);
-            }
-            var text = output.TransformText();
-            try
-            {
-                File.WriteAllText(filename, text);
+            else
+                // simulate write as the text is the same as the previously written one
                 return true;
-            }
-            catch (Exception ex)
+        }
+
+        /// <summary>
+        /// Get hash code as text
+        /// </summary>
+        internal static string GetStringSha256Hash(string text)
+        {
+            if (String.IsNullOrEmpty(text))
+                return String.Empty;
+
+            using (var sha = new System.Security.Cryptography.SHA256Managed())
             {
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Could not write script to file {filename}, error: {ex.Message}");
-                return false;
+                byte[] textData = System.Text.Encoding.UTF8.GetBytes(text);
+                byte[] hash = sha.ComputeHash(textData);
+                return BitConverter.ToString(hash).Replace("-", String.Empty);
             }
         }
 

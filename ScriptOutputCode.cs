@@ -13,7 +13,6 @@ namespace StudioAvw.Gh.Parasites
     {
         public string UniqueNamespace { get; set; }
         public string InputOutput { get; set; }
-        public string Using { get; set; }
         public string SourceCode { get; set; }
         public string AdditionalCode { get; set; }
 
