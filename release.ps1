@@ -196,6 +196,8 @@ if (-Not (Test-Path "$($projectRoot)\output"))
 Remove-Item -path "$($projectRoot)\bin\*" -recurse 
 Remove-Item -path "$($projectRoot)\obj\*" -recurse 
 Remove-Item -path "$($projectRoot)\dist\*" -recurse 
+Remove-Item -path "$($projectRoot)\output\*" -recurse 
+
 
 Write-Host "Building new version.."
 ## Build a new version
@@ -242,12 +244,7 @@ Move-Item $($yakfile.FullName) $output
 Write-Host "Packaging (mac)rhi version.."
 # Create RHI Installer (zip package)
 Compress-Archive -Path "$($temp)/*" -DestinationPath $outputZip
-Compress-Archive -Path "$($tempMacRhi)/*" -DestinationPath $outputZipMacRhi
 Copy-Item $outputZip $output
-Move-Item $outputZip $outputRhi
-Move-Item $outputRhi $output
-Move-Item $outputZipMacRhi $outputMacRhi
-Move-Item $outputMacRhi $output
 Pop-Location;
 
 Write-Host "Done. If you wish to publish the yak file, use the command  .\yak.exe push $($projectRoot)\$($output)\$($yakfile)"

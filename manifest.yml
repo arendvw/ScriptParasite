@@ -1,6 +1,6 @@
 ---
 name: ScriptParasite
-version: 1.0.2
+version: 1.1.0
 authors:
 - Arend van Waart
 description: Edit C# components with any Editor or IDE such as Visual Studio
