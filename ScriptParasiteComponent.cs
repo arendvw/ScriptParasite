@@ -328,7 +328,6 @@ namespace StudioAvw.Gh.Parasites
                 Cleanup();
                 return;
             }
-
             Watcher.IsWriting = true;
             WriteScriptToFile(TargetComponent, FileNameSafe);
             await Task.Delay(50);
@@ -418,7 +417,7 @@ namespace StudioAvw.Gh.Parasites
         /// </summary>
         /// <param name="script"></param>
         /// <returns></returns>
-        private string ExtractScriptParameters(Component_CSNET_Script script)
+        internal static string ExtractScriptParameters(Component_CSNET_Script script)
         {
             var elements = new List<string>();
             var map = BuildMap();
@@ -494,7 +493,7 @@ namespace StudioAvw.Gh.Parasites
         /// <param name="ghgoo"></param>
         /// <param name="native"></param>
         /// <param name="nspace"></param>
-        void AddMethod(Dictionary<string, string[]> map, string hint, string method, string ghgoo, string native,
+        static void AddMethod(Dictionary<string, string[]> map, string hint, string method, string ghgoo, string native,
             string nspace)
         {
             map.Add(hint, new[] {method, ghgoo, native, nspace});
@@ -504,7 +503,7 @@ namespace StudioAvw.Gh.Parasites
         ///  Build a map of typehints.
         /// </summary>
         /// <returns>A dictionary of how to convert certain GH types to native types, to script types.</returns>
-        public Dictionary<string, string[]> BuildMap()
+        public static Dictionary<string, string[]> BuildMap()
         {
             var map = new Dictionary<string, string[]>();
             AddMethod(map, "GH_NullHint", "AddGenericParameter ", "GH_ObjectWrapper", "object", "System");

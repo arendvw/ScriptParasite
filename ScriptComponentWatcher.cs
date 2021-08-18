@@ -13,7 +13,7 @@ namespace StudioAvw.Gh.Parasites
         {
             Document = document;
             CurrentScript = GetScript();
-            Debouncer = DebounceHelper.Debounce(SendUpdate, 300);
+            Debouncer = DebounceHelper.Debounce(SendUpdate, 100);
 
             document.SolutionExpired += SolutionExpired;
             document.ObjectChanged += ObjectChanged;
@@ -51,7 +51,10 @@ namespace StudioAvw.Gh.Parasites
 
         public string GetScript()
         {
-            return $"{Document.ScriptSource.AdditionalCode} {Document.ScriptSource.ScriptCode} {Document.ScriptSource.UsingCode}";
+            return $"{Document.ScriptSource.AdditionalCode}" +
+                   $"{Document.ScriptSource.ScriptCode}" +
+                   $"{Document.ScriptSource.UsingCode}" +
+                   $"{ ScriptParasiteComponent.ExtractScriptParameters(Document) }";
         }
 
         private void SolutionExpired(IGH_DocumentObject sender, GH_SolutionExpiredEventArgs e)
