@@ -9,7 +9,7 @@ namespace StudioAvw.Gh.Parasites
 
         public override string Name => "ScriptParasite";
 
-        public override string Version => "1.1.1";
+        public override string Version => "1.1.2";
 
         public override Bitmap Icon => Resources.ScriptParasiteIcon;
 
