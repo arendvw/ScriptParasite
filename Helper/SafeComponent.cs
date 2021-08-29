@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Grasshopper.Kernel;
+﻿using Grasshopper.Kernel;
 
-namespace StudioAvw.Gh.Parasites
+namespace StudioAvw.Gh.Parasites.Helper
 {
     public abstract class SafeComponent : GH_Component
     {

@@ -7,18 +7,15 @@
 //     the code is regenerated.
 // </auto-generated>
 // ------------------------------------------------------------------------------
-namespace StudioAvw.Gh.Parasites
+namespace StudioAvw.Gh.Parasites.Template
 {
-    using System.Linq;
-    using System.Text;
-    using System.Collections.Generic;
     using System;
     
     /// <summary>
     /// Class to produce the template output
     /// </summary>
     
-    #line 1 "C:\development\ScriptParasite\ProjectOutput.tt"
+    #line 1 "C:\development\ScriptParasite\Template\ProjectOutput.tt"
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "16.0.0.0")]
     public partial class ProjectOutput : ProjectOutputBase
     {
@@ -39,7 +36,7 @@ namespace StudioAvw.Gh.Parasites
     <Reference Include=""GH_IO"">
       <HintPath>");
             
-            #line 15 "C:\development\ScriptParasite\ProjectOutput.tt"
+            #line 12 "C:\development\ScriptParasite\Template\ProjectOutput.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GrasshopperIoPath));
             
             #line default
@@ -47,7 +44,7 @@ namespace StudioAvw.Gh.Parasites
             this.Write("</HintPath>\r\n      <Private>False</Private>\r\n    </Reference>\r\n    <Reference Inc" +
                     "lude=\"Grasshopper\">\r\n      <HintPath>");
             
-            #line 19 "C:\development\ScriptParasite\ProjectOutput.tt"
+            #line 16 "C:\development\ScriptParasite\Template\ProjectOutput.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GrasshopperPath));
             
             #line default
@@ -55,7 +52,7 @@ namespace StudioAvw.Gh.Parasites
             this.Write("</HintPath>\r\n      <Private>False</Private>\r\n    </Reference>\r\n    <Reference Inc" +
                     "lude=\"RhinoCommon\">\r\n      <HintPath>");
             
-            #line 23 "C:\development\ScriptParasite\ProjectOutput.tt"
+            #line 20 "C:\development\ScriptParasite\Template\ProjectOutput.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(RhinoCommonPath));
             
             #line default

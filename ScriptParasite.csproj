@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>StudioAvw.Gh.Parasites</RootNamespace>
     <AssemblyName>ScriptParasite</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
@@ -34,9 +34,21 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ScriptComponents, Version=6.33.20343.16431, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>.\ScriptComponents.dll</HintPath>
+    <Reference Include="GH_IO">
+      <HintPath>lib\GH_IO.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Grasshopper">
+      <HintPath>lib\Grasshopper.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="RhinoCommon">
+      <HintPath>lib\RhinoCommon.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="ScriptComponents">
       <SpecificVersion>False</SpecificVersion>
+      <HintPath>lib\ScriptComponents.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -51,41 +63,41 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DebounceHelper.cs" />
+    <Compile Include="Helper\DebounceHelper.cs" />
     <None Include="README.md" />
-    <Compile Include="ScriptComponentWatcher.cs" />
+    <Compile Include="Watcher\ScriptComponentWatcher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="SafeComponent.cs" />
-    <Compile Include="ProjectOutput.cs">
+    <Compile Include="Helper\SafeComponent.cs" />
+    <Compile Include="Template\ProjectOutput.cs">
       <DependentUpon>ProjectOutput.tt</DependentUpon>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="GrasshopperDocumentWatcher.cs" />
-    <Compile Include="ScriptFilesystemWatcher.cs" />
-    <Compile Include="ScriptOutput.cs">
+    <Compile Include="Watcher\GrasshopperDocumentWatcher.cs" />
+    <Compile Include="Watcher\ScriptFilesystemWatcher.cs" />
+    <Compile Include="Template\ScriptOutput.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>ScriptOutput.tt</DependentUpon>
     </Compile>
-    <Compile Include="ProjectOutputCode.cs" />
-    <Compile Include="ScriptOutputCode.cs" />
-    <Compile Include="ScriptParasiteComponent.cs" />
+    <Compile Include="Template\ProjectOutputCode.cs" />
+    <Compile Include="Template\ScriptOutputCode.cs" />
+    <Compile Include="Component\ScriptParasiteComponent.cs" />
     <Compile Include="ScriptParasiteInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include=".gitattributes" />
     <Content Include=".gitignore" />
-    <Content Include="ProjectOutput.tt">
+    <Content Include="Template\ProjectOutput.tt">
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>ProjectOutput.cs</LastGenOutput>
     </Content>
-    <Content Include="ScriptOutput.tt">
+    <Content Include="Template\ScriptOutput.tt">
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>ScriptOutput.cs</LastGenOutput>
     </Content>
@@ -107,11 +119,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="dist\" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Grasshopper">
-      <Version>6.35.21222.17001</Version>
-    </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

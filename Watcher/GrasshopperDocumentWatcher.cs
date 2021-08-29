@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Diagnostics;
-using System.IO;
 using System.Threading.Tasks;
 using Grasshopper.Kernel;
+using TimeoutException = StudioAvw.Gh.Parasites.Component.TimeoutException;
 
-namespace StudioAvw.Gh.Parasites
+namespace StudioAvw.Gh.Parasites.Watcher
 {
     public class GrasshopperDocumentWatcher : IDisposable
     {

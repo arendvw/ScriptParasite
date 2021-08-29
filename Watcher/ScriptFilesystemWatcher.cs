@@ -1,7 +1,8 @@
 ﻿using System;
 using System.IO;
+using StudioAvw.Gh.Parasites.Helper;
 
-namespace StudioAvw.Gh.Parasites
+namespace StudioAvw.Gh.Parasites.Watcher
 {
 
 

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace StudioAvw.Gh.Parasites
+﻿namespace StudioAvw.Gh.Parasites.Template
 {
     partial class ProjectOutput
     {

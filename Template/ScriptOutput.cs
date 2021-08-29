@@ -7,18 +7,15 @@
 //     the code is regenerated.
 // </auto-generated>
 // ------------------------------------------------------------------------------
-namespace StudioAvw.Gh.Parasites
+namespace StudioAvw.Gh.Parasites.Template
 {
-    using System.Linq;
-    using System.Text;
-    using System.Collections.Generic;
     using System;
     
     /// <summary>
     /// Class to produce the template output
     /// </summary>
     
-    #line 1 "C:\development\ScriptParasite\ScriptOutput.tt"
+    #line 1 "C:\development\ScriptParasite\Template\ScriptOutput.tt"
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "16.0.0.0")]
     public partial class ScriptOutput : ScriptOutputBase
     {
@@ -32,7 +29,7 @@ namespace StudioAvw.Gh.Parasites
                     "ing Rhino;\r\nusing Rhino.Geometry;\r\n\r\nusing Grasshopper;\r\nusing Grasshopper.Kerne" +
                     "l;\r\nusing Grasshopper.Kernel.Data;\r\nusing Grasshopper.Kernel.Types;\r\n\r\n");
             
-            #line 18 "C:\development\ScriptParasite\ScriptOutput.tt"
+            #line 15 "C:\development\ScriptParasite\Template\ScriptOutput.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Using));
             
             #line default
@@ -40,7 +37,7 @@ namespace StudioAvw.Gh.Parasites
             this.Write("\r\n\r\n/// <summary>\r\n/// This class will be instantiated on demand by the Script co" +
                     "mponent.\r\n/// </summary>\r\npublic abstract class Script_Instance_");
             
-            #line 23 "C:\development\ScriptParasite\ScriptOutput.tt"
+            #line 20 "C:\development\ScriptParasite\Template\ScriptOutput.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(UniqueNamespace));
             
             #line default
@@ -73,21 +70,21 @@ namespace StudioAvw.Gh.Parasites
                     "a default value.\r\n  /// </summary>\r\n  #region Runscript\r\n  private void RunScrip" +
                     "t(");
             
-            #line 60 "C:\development\ScriptParasite\ScriptOutput.tt"
+            #line 57 "C:\development\ScriptParasite\Template\ScriptOutput.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(InputOutput));
             
             #line default
             #line hidden
             this.Write(")\r\n  {\r\n");
             
-            #line 62 "C:\development\ScriptParasite\ScriptOutput.tt"
+            #line 59 "C:\development\ScriptParasite\Template\ScriptOutput.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(SourceCode));
             
             #line default
             #line hidden
             this.Write("\r\n  }\r\n  #endregion\r\n  #region Additional\r\n");
             
-            #line 66 "C:\development\ScriptParasite\ScriptOutput.tt"
+            #line 63 "C:\development\ScriptParasite\Template\ScriptOutput.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(AdditionalCode));
             
             #line default

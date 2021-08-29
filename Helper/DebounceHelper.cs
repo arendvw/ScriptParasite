@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace StudioAvw.Gh.Parasites
+namespace StudioAvw.Gh.Parasites.Helper
 {
     public static class DebounceHelper
     {

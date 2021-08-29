@@ -1,23 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Threading.Tasks;
 using Grasshopper.GUI.Script;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Parameters.Hints;
 using Grasshopper.Kernel.Special;
-using Grasshopper.Kernel.Types;
 using Rhino;
 using ScriptComponents;
+using StudioAvw.Gh.Parasites.Helper;
+using StudioAvw.Gh.Parasites.Template;
+using StudioAvw.Gh.Parasites.Watcher;
 
-namespace StudioAvw.Gh.Parasites
+namespace StudioAvw.Gh.Parasites.Component
 {
     public class ScriptParasiteComponent : SafeComponent
     {
@@ -102,73 +102,82 @@ namespace StudioAvw.Gh.Parasites
 
         protected override void SolveInstance(IGH_DataAccess da)
         {
-            // reset everything, and let's start over..
-            Cleanup();
-            // things are botched up if this script runs more than once.
-            // events might be added more then once if this component somehow has an input of multiple items.
-            if (_iteration++ != 0) return;
-
-            bool watch = false;
-            string folder = "";
-
-            if (!da.GetData(0, ref watch)) return;
-            if (!da.GetData(1, ref folder)) return;
-
-            if (folder == null)
-            {
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Scripts Folder was not set");
-                return;
-            }
-            folder = folder.Trim();
-
-            if (!TryGetDirectoryVerbose(folder)) return;
-
-            if (!watch)
-            { 
-                return;
-            }
-
-            // Find the scripts in the current group.
-            var scripts = FindObjectsOfTypeInCurrentGroup<Component_CSNET_Script>();
-
-            if (scripts.Count != 1)
-            {
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning,
-                    "This component should be added in a group with exactly one C# script.");
-                return;
-            }
-
-            TargetComponent = scripts[0];
-
-            Folder = folder;
-
-            string directory;
-            string filename;
             try
             {
-                directory = Path.GetDirectoryName(FileNameSafe);
-                filename = Path.GetFileName(FileNameSafe);
-                if (directory == null || filename == null)
+                // reset everything, and let's start over..
+                Cleanup();
+                // things are botched up if this script runs more than once.
+                // events might be added more then once if this component somehow has an input of multiple items.
+                if (_iteration++ != 0) return;
+
+                bool watch = false;
+                string folder = "";
+
+                if (!da.GetData(0, ref watch)) return;
+                if (!da.GetData(1, ref folder)) return;
+
+                if (folder == null)
                 {
-                    throw new Exception("No file name found");
+                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Scripts Folder was not set");
+                    return;
                 }
+
+                folder = folder.Trim();
+
+                if (!TryGetDirectoryVerbose(folder)) return;
+
+                if (!watch)
+                {
+                    return;
+                }
+
+                // Find the scripts in the current group.
+                var scripts = FindObjectsOfTypeInCurrentGroup<Component_CSNET_Script>();
+
+                if (scripts.Count != 1)
+                {
+                    AddRuntimeMessage(GH_RuntimeMessageLevel.Warning,
+                        "This component should be added in a group with exactly one C# script.");
+                    return;
+                }
+
+                TargetComponent = scripts[0];
+
+                Folder = folder;
+
+                string directory;
+                string filename;
+                try
+                {
+                    directory = Path.GetDirectoryName(FileNameSafe);
+                    filename = Path.GetFileName(FileNameSafe);
+                    if (directory == null || filename == null)
+                    {
+                        throw new Exception("No file name found");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error,
+                        $"Invalid project name or component name, error {ex.Message}");
+                    return;
+                }
+
+                if (!WriteScriptToFile(TargetComponent, FileNameSafe)) return;
+
+                // Create a new FileSystemWatcher and set its properties.
+                // http://stackoverflow.com/questions/721714/notification-when-a-file-changes
+                AddEvents(directory, filename);
+
+                WriteDefaultConfig(directory);
+
+                EnsureProject(Path.Combine(directory, "GrasshopperScripts.csproj"));
+                EnsureEditorConfig(Path.Combine(directory, ".editorconfig"));
             }
             catch (Exception ex)
             {
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Invalid project name or component name, error {ex.Message}");
-                return;
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Unexpected error: {ex.Message}, \nstacktrace: {ex.StackTrace}");
             }
-
-            if (!WriteScriptToFile(TargetComponent, FileNameSafe)) return;
-            
-            // Create a new FileSystemWatcher and set its properties.
-            // http://stackoverflow.com/questions/721714/notification-when-a-file-changes
-            AddEvents(directory, filename);
-
-            WriteDefaultConfig(directory);
-
-            EnsureProject(Path.Combine(directory, "GrasshopperScripts.csproj"));
-            EnsureEditorConfig(Path.Combine(directory, ".editorconfig"));
         }
 
         /// <summary>
@@ -238,7 +247,8 @@ namespace StudioAvw.Gh.Parasites
             var runscript = GetRegion(fileContent, "Runscript");
             var rsLines = runscript.Split(new[] {Environment.NewLine}, StringSplitOptions.None);
             runscript = string.Join(Environment.NewLine, rsLines.Skip(2).Take(rsLines.Length - 3).ToList());
-            scriptObject.SourceCodeChanged(new GH_ScriptEditor(GH_ScriptLanguage.CS));
+            
+            scriptObject.SourceCodeChanged(new GUI.Script.Cs.GH_ScriptEditor(GUI.Script.Cs.GH_ScriptLanguage.CS));
             var additional = GetRegion(fileContent, "Additional");
             scriptObject.ScriptSource.ScriptCode = runscript;
             scriptObject.ScriptSource.AdditionalCode = additional;
@@ -334,40 +344,33 @@ namespace StudioAvw.Gh.Parasites
             Watcher.IsWriting = false;
         }
 
-        public async void OnFileChanged(Object sender, EventArgs eventArgs)
+        public async void OnFileChanged(object sender, EventArgs eventArgs)
         {
+            if (!ShouldContinue())
+            {
+                Cleanup();
+                return;
+            }
+
+            ComponentWatcher.IsUpdating = true;
+            var ghWatcher = new GrasshopperDocumentWatcher(OnPingDocument());
             try
             {
-                if (!ShouldContinue())
+                await ghWatcher.WaitForSolutionEnd(10000);
+                Grasshopper.Instances.DocumentEditor?.BeginInvoke((Action) (async () =>
                 {
-                    Cleanup();
-                    return;
-                }
-
-                ComponentWatcher.IsUpdating = true;
-                var ghWatcher = new GrasshopperDocumentWatcher(OnPingDocument());
-                try
-                {
-                    await ghWatcher.WaitForSolutionEnd(10000);
-                    Grasshopper.Instances.DocumentEditor?.BeginInvoke((Action)(async () =>
-                    {
-                        WriteScriptToComponent(TargetComponent, FileNameSafe);
-                        TargetComponent.ExpireSolution(false);
-                        OnPingDocument().ScheduleSolution(10);
-                        await Task.Delay(50);
-                        ComponentWatcher.IsUpdating = false;
-                    }));
-                }
-                catch (TimeoutException)
-                {
-                    // do nothing..
-                    // grasshopper is still busy after 100 seconds..
-                    // time to bail out.
-                }
+                    WriteScriptToComponent(TargetComponent, FileNameSafe);
+                    TargetComponent.ExpireSolution(false);
+                    OnPingDocument().ScheduleSolution(10);
+                    await Task.Delay(50);
+                    ComponentWatcher.IsUpdating = false;
+                }));
             }
-            catch (Exception exp)
+            catch (TimeoutException)
             {
-                RhinoApp.WriteLine($"Error in filehandler:{exp.Message}\\n{exp.StackTrace}");
+                // do nothing..
+                // grasshopper is still busy after 100 seconds..
+                // time to bail out.
             }
         }
 
@@ -399,15 +402,15 @@ namespace StudioAvw.Gh.Parasites
                 AdditionalCode = script.ScriptSource.AdditionalCode,
             };
 
-            var text = output.TransformText();
             try
             {
+                var text = output.TransformText();
                 File.WriteAllText(filename, text);
                 return true;
             }
             catch (Exception ex)
             {
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Could not write script to file {filename}, error: {ex.Message}");
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Could not write script to file {filename}, error: {ex.Message}, stacktrace: {ex.StackTrace}");
                 return false;
             }
         }
