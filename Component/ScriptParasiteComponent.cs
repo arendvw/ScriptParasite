@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -67,6 +68,15 @@ namespace StudioAvw.Gh.Parasites.Component
                 return Path.Combine($"{Folder}",$"{name}-{componentId}.cs");
             }
         }
+        protected string FileNameOnly
+        {
+            get
+            {
+                var name = Regex.Replace(TargetComponent.NickName, @"\W", "_");
+                var componentId = TargetComponent.InstanceGuid.ToString().Replace(" - ", "").Substring(0, 5);
+                return $"{name}-{componentId}.cs";
+            }
+        }
 
         protected Component_CSNET_Script TargetComponent { get; set; }
 
@@ -90,6 +100,7 @@ namespace StudioAvw.Gh.Parasites.Component
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
+            pManager.AddTextParameter("File", "F", "The file that corresponds to the scrip being monitored", GH_ParamAccess.item);
         }
 
         private int _iteration;
@@ -173,6 +184,9 @@ namespace StudioAvw.Gh.Parasites.Component
 
                 EnsureProject(Path.Combine(directory, "GrasshopperScripts.csproj"));
                 EnsureEditorConfig(Path.Combine(directory, ".editorconfig"));
+
+                //show which file is used for the selected script
+                da.SetData(0, FileNameOnly);
             }
             catch (Exception ex)
             {
@@ -630,6 +644,64 @@ indent_size = 2";
             };
             File.WriteAllText(file, output.TransformText());
         }
+
+        public override void CreateAttributes()
+        {
+            m_attributes = new DetectDoubleClick(this);
+        }
+
+        public void OpenFileBrowesr()
+        {
+            OperatingSystem os = Environment.OSVersion;
+            PlatformID pid = os.Platform;
+            switch (pid)
+            {
+                case PlatformID.Win32NT:
+                case PlatformID.Win32S:
+                case PlatformID.Win32Windows:
+                case PlatformID.WinCE:
+                    //"I'm on windows!"
+                    if (Directory.Exists(Folder))
+                    {
+                        ProcessStartInfo startInfo = new ProcessStartInfo
+                        {
+                            Arguments = Folder,
+                            FileName = "explorer.exe"
+                        };
+
+                        Process.Start(startInfo);
+                    }
+                    else
+                    {
+                        System.Windows.Forms.MessageBox.Show($"{0} directory does not exist! Double click cannot open explorer.");
+                    }
+                    break;
+                case PlatformID.Unix:
+                    //"I'm a linux box!"
+                    break;
+                case PlatformID.MacOSX:
+                    //"I'm a mac!"
+                    break;
+                default:
+                    AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, "Unknonw OS. Double click to open is disabled");
+                    break;
+            }
+        }
+
+        public class DetectDoubleClick : Grasshopper.Kernel.Attributes.GH_ComponentAttributes
+        {
+            public DetectDoubleClick(IGH_Component component) : base(component)
+            {
+            }
+
+            public override GH_ObjectResponse RespondToMouseDoubleClick(GH_Canvas sender, GH_CanvasMouseEvent e)
+            {
+                (Owner as ScriptParasiteComponent)?.OpenFileBrowesr();
+                return GH_ObjectResponse.Handled;
+            }
+        }
+
+
     }
 
     public class TimeoutException : Exception
