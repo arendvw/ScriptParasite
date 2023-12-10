@@ -4,8 +4,8 @@
 
 ### TO USE: Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope LocalMachine
 $namePrefix = "ScriptParasite"
-$copyToOutput = ".\bin\Release\ScriptParasite.gha",
-".\bin\Release\ScriptParasite.pdb"
+$release = "ReleaseRhino8Mac"
+$copyToOutput = ".\bin\$release\ScriptParasite.gha"
 
 # Where is the grasshopper assembly file?
 $grasshopperAssemblyInfofile = "./ScriptParasiteInfo.cs";
@@ -25,8 +25,9 @@ Maximum visual studio version
 .EXAMPLE
 Find-MsBuild 2015
 #>
-Function Find-MsBuild([int] $MaxVersion = 2019)
+Function Find-MsBuild([int] $MaxVersion = 2022)
 {
+    $community2022Path = "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\msbuild.exe"
     $agentPath2019 = "$Env:programfiles (x86)\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin\msbuild.exe"
     $devPath2019 = "$Env:programfiles (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin\msbuild.exe"
     $proPath2019 = "$Env:programfiles (x86)\Microsoft Visual Studio\2019\Professional\MSBuild\Current\Bin\msbuild.exe"
@@ -39,6 +40,7 @@ Function Find-MsBuild([int] $MaxVersion = 2019)
     $fallback2013Path = "${Env:ProgramFiles(x86)}\MSBuild\12.0\Bin\MSBuild.exe"
     $fallbackPath = "C:\Windows\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe"
 
+    If ((2022 -le $MaxVersion) -And (Test-Path $community2022Path)) { return $community2022Path }
     If ((2019 -le $MaxVersion) -And (Test-Path $agentPath2019)) { return $agentPath2019 } 
     If ((2019 -le $MaxVersion) -And (Test-Path $devPath2019)) { return $devPath2019 } 
     If ((2019 -le $MaxVersion) -And (Test-Path $proPath2019)) { return $proPath2019 } 
@@ -203,12 +205,13 @@ Write-Host "Building new version.."
 ## Build a new version
 $msbuild = Find-MsBuild;
 Write-Host "Building with msbuild $msbuild"
-$result = & $msbuild "/p:Configuration=Release" "/target:clean,restore,build"
+$result = & $msbuild "/p:Configuration=$release" "/target:clean,restore,build"
 if ($null -eq $result) {
     Write-Host "Unable to build package:";
     Write-Host $result;
     exit;
 }
+
 
 Write-Host "Packaging new version.."
 # Create empty temporary folder

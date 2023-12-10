@@ -13,7 +13,7 @@ $file = "$dist\manifest.yml"
 # copy .gha to dist/
 # TODO: make script generic by moving files to command line args?
 Copy-Item -Path ..\bin\Release\ScriptParasite.gha -Destination $dist
-Copy-Item -Path ..\bin\Release\ScriptParasite.pdb -Destination $dist
+Copy-Item -Path ..\bin\Release\ScriptParasite.pdb -Destinati.\		on $dist
 
 # zip (create package manually)
 Compress-Archive -Path $dist\* -DestinationPath $dist\build.zip -Force

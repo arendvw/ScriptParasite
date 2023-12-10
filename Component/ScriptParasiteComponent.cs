@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -27,6 +28,43 @@ namespace StudioAvw.Gh.Parasites.Component
         {
             Message = "Disabled";
         }
+
+        public override void CreateAttributes()
+        {
+            m_attributes = new DetectDoubleClickAttributes(this);
+        }
+
+        public void OpenFileBrowser()
+        {
+            if (Folder == null)
+            {
+                return;
+            }
+            var os = Environment.OSVersion;
+            var pid = os.Platform;
+            switch (pid)
+            {
+                case PlatformID.Win32NT:
+
+                    var fileExists = File.Exists(FileNameSafe);
+                    var startInfo = new ProcessStartInfo
+                    {
+                        Arguments = fileExists ? $"/select,\"{FileNameSafe}\"" : Folder,
+                        FileName = "explorer.exe"
+                    };
+                    Process.Start(startInfo);
+                    break;
+                case PlatformID.MacOSX:
+                case PlatformID.Unix:
+                    // It's probably a mac
+                    break;
+
+                // we are very unlikely to encounter gh on any other platform
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
 
         protected override Bitmap Icon => Resources.ScriptParasiteIcon;
         
@@ -110,8 +148,8 @@ namespace StudioAvw.Gh.Parasites.Component
                 // events might be added more then once if this component somehow has an input of multiple items.
                 if (_iteration++ != 0) return;
 
-                bool watch = false;
-                string folder = "";
+                var watch = false;
+                var folder = "";
 
                 if (!da.GetData(0, ref watch)) return;
                 if (!da.GetData(1, ref folder)) return;
@@ -247,8 +285,12 @@ namespace StudioAvw.Gh.Parasites.Component
             var runscript = GetRegion(fileContent, "Runscript");
             var rsLines = runscript.Split(new[] {Environment.NewLine}, StringSplitOptions.None);
             runscript = string.Join(Environment.NewLine, rsLines.Skip(2).Take(rsLines.Length - 3).ToList());
-            
+
+#if OSX
             scriptObject.SourceCodeChanged(new GUI.Script.Cs.GH_ScriptEditor(GUI.Script.Cs.GH_ScriptLanguage.CS));
+#else
+            scriptObject.SourceCodeChanged(new GH_ScriptEditor(GH_ScriptLanguage.CS));
+#endif
             var additional = GetRegion(fileContent, "Additional");
             scriptObject.ScriptSource.ScriptCode = runscript;
             scriptObject.ScriptSource.AdditionalCode = additional;
@@ -257,7 +299,7 @@ namespace StudioAvw.Gh.Parasites.Component
 
         private static string GetUsing(string fileContent)
         {
-            List<string> allMatches = GetUsingList(fileContent);
+            var allMatches = GetUsingList(fileContent);
 
             var output = "";
             foreach (var item in allMatches)
@@ -630,9 +672,5 @@ indent_size = 2";
             };
             File.WriteAllText(file, output.TransformText());
         }
-    }
-
-    public class TimeoutException : Exception
-    {
     }
 }

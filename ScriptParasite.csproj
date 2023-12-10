@@ -33,24 +33,201 @@
     <WarningLevel>4</WarningLevel>
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
-  <ItemGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug-Rhino6Win|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Debug-Rhino6Win\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Rhino7WinDebug|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Rhino7WinDebug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'DebugRhino7Mac|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\DebugRhino7Mac\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;OSX</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'ReleaseRhino6Win|AnyCPU'">
+    <OutputPath>bin\ReleaseRhino6Win\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'ReleaseRhino7Win|AnyCPU'">
+    <OutputPath>bin\ReleaseRhino7Win\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'ReleaseRhino7Mac|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\ReleaseRhino7Mac\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;OSX</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'DebugRhino8Win|AnyCPU'">
+    <OutputPath>bin\DebugRhino8Win\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'ReleaseRhino8Win|AnyCPU'">
+    <OutputPath>bin\ReleaseRhino8Win\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'ReleaseRhino8Mac|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\ReleaseRhino8Mac\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;OSX</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(Configuration)' == 'ReleaseRhino6Win' Or '$(Configuration)' == 'DebugRhino6Win'">
     <Reference Include="GH_IO">
-      <HintPath>lib\GH_IO.dll</HintPath>
+      <HintPath>lib\Windows_Rhino7\GH_IO.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Grasshopper">
-      <HintPath>lib\Grasshopper.dll</HintPath>
+      <HintPath>lib\Windows_Rhino7\Grasshopper.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="RhinoCommon">
-      <HintPath>lib\RhinoCommon.dll</HintPath>
+      <HintPath>lib\Windows_Rhino7\RhinoCommon.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="ScriptComponents">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>lib\ScriptComponents.dll</HintPath>
+      <HintPath>lib\Windows_Rhino7\ScriptComponents.dll</HintPath>
       <Private>False</Private>
     </Reference>
+  </ItemGroup>
+  <ItemGroup Condition="'$(Configuration)' == 'ReleaseRhino7Win'">
+    <Reference Include="GH_IO">
+      <HintPath>lib\Windows_Rhino7\GH_IO.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Grasshopper">
+      <HintPath>lib\Windows_Rhino7\Grasshopper.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="RhinoCommon">
+      <HintPath>lib\Windows_Rhino7\RhinoCommon.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="ScriptComponents">
+      <HintPath>lib\Windows_Rhino7\ScriptComponents.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup Condition="'$(Configuration)' == 'DebugRhino7Win'">
+    <Reference Include="GH_IO">
+      <HintPath>lib\Windows_Rhino7\GH_IO.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Grasshopper">
+      <HintPath>lib\Windows_Rhino7\Grasshopper.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="RhinoCommon">
+      <HintPath>lib\Windows_Rhino7\RhinoCommon.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="ScriptComponents">
+      <HintPath>lib\Windows_Rhino7\ScriptComponents.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup Condition="'$(Configuration)' == 'ReleaseRhino8Win'">
+    <Reference Include="GH_IO">
+      <HintPath>lib\Windows_Rhino8\GH_IO.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Grasshopper">
+      <HintPath>lib\Windows_Rhino8\Grasshopper.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="RhinoCommon">
+      <HintPath>lib\Windows_Rhino8\RhinoCommon.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="ScriptComponents">
+      <HintPath>lib\Windows_Rhino8\ScriptComponents.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup Condition="'$(Configuration)' == 'DebugRhino8Win'">
+    <Reference Include="GH_IO">
+      <HintPath>lib\Windows_Rhino8\GH_IO.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Grasshopper">
+      <HintPath>lib\Windows_Rhino8\Grasshopper.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="RhinoCommon">
+      <HintPath>lib\Windows_Rhino8\RhinoCommon.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="ScriptComponents">
+      <HintPath>lib\Windows_Rhino8\ScriptComponents.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="ScriptComponents">
+      <HintPath>lib\Windows_Rhino8\RhinoCodePluginGH.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup Condition="'$(Configuration)' == 'DebugRhino7Mac' Or '$(Configuration)' == 'ReleaseRhino7Mac'">
+    <Reference Include="GH_IO">
+      <HintPath>lib\MacOSX_Rhino7\GH_IO.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Grasshopper">
+      <HintPath>lib\MacOSX_Rhino7\Grasshopper.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="RhinoCommon">
+      <HintPath>lib\MacOSX_Rhino7\RhinoCommon.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="ScriptComponents">
+      <HintPath>lib\MacOSX_Rhino7\ScriptComponents.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup Condition="'$(Configuration)' == 'ReleaseRhino8Mac'">
+    <Reference Include="GH_IO">
+      <HintPath>lib\MacOSX_Rhino8\GH_IO.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Grasshopper">
+      <HintPath>lib\MacOSX_Rhino8\Grasshopper.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="RhinoCommon">
+      <HintPath>lib\MacOSX_Rhino8\RhinoCommon.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="ScriptComponents">
+      <HintPath>lib\MacOSX_Rhino8\ScriptComponents.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -63,6 +240,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Component\DetectDoubleClickAttributes.cs" />
+    <Compile Include="Component\TimeoutException.cs" />
     <Compile Include="Helper\DebounceHelper.cs" />
     <None Include="README.md" />
     <Compile Include="Watcher\ScriptComponentWatcher.cs" />

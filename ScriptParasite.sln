@@ -1,20 +1,69 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31205.134
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33213.308
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScriptParasite", "ScriptParasite.csproj", "{83072288-AA4D-4A48-AB9F-9EE289A1595F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScriptParasite2", "ScriptParasite2.csproj", "{CA3D5F80-3DE1-49C2-BBA9-CED0453DB030}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		DebugRhino6Win|Any CPU = DebugRhino6Win|Any CPU
+		DebugRhino7Mac|Any CPU = DebugRhino7Mac|Any CPU
+		DebugRhino7Win|Any CPU = DebugRhino7Win|Any CPU
+		DebugRhino8Win|Any CPU = DebugRhino8Win|Any CPU
 		Release|Any CPU = Release|Any CPU
+		ReleaseRhino6Win|Any CPU = ReleaseRhino6Win|Any CPU
+		ReleaseRhino7Mac|Any CPU = ReleaseRhino7Mac|Any CPU
+		ReleaseRhino7Win|Any CPU = ReleaseRhino7Win|Any CPU
+		ReleaseRhino8Mac|Any CPU = ReleaseRhino8Mac|Any CPU
+		ReleaseRhino8Win|Any CPU = ReleaseRhino8Win|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{83072288-AA4D-4A48-AB9F-9EE289A1595F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{83072288-AA4D-4A48-AB9F-9EE289A1595F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{83072288-AA4D-4A48-AB9F-9EE289A1595F}.DebugRhino6Win|Any CPU.ActiveCfg = Debug-Rhino6Win|Any CPU
+		{83072288-AA4D-4A48-AB9F-9EE289A1595F}.DebugRhino6Win|Any CPU.Build.0 = Debug-Rhino6Win|Any CPU
+		{83072288-AA4D-4A48-AB9F-9EE289A1595F}.DebugRhino7Mac|Any CPU.ActiveCfg = DebugRhino7Mac|Any CPU
+		{83072288-AA4D-4A48-AB9F-9EE289A1595F}.DebugRhino7Mac|Any CPU.Build.0 = DebugRhino7Mac|Any CPU
+		{83072288-AA4D-4A48-AB9F-9EE289A1595F}.DebugRhino7Win|Any CPU.ActiveCfg = ReleaseRhino7Win|Any CPU
+		{83072288-AA4D-4A48-AB9F-9EE289A1595F}.DebugRhino7Win|Any CPU.Build.0 = ReleaseRhino7Win|Any CPU
+		{83072288-AA4D-4A48-AB9F-9EE289A1595F}.DebugRhino8Win|Any CPU.ActiveCfg = DebugRhino8Win|Any CPU
+		{83072288-AA4D-4A48-AB9F-9EE289A1595F}.DebugRhino8Win|Any CPU.Build.0 = DebugRhino8Win|Any CPU
 		{83072288-AA4D-4A48-AB9F-9EE289A1595F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{83072288-AA4D-4A48-AB9F-9EE289A1595F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{83072288-AA4D-4A48-AB9F-9EE289A1595F}.ReleaseRhino6Win|Any CPU.ActiveCfg = ReleaseRhino6Win|Any CPU
+		{83072288-AA4D-4A48-AB9F-9EE289A1595F}.ReleaseRhino6Win|Any CPU.Build.0 = ReleaseRhino6Win|Any CPU
+		{83072288-AA4D-4A48-AB9F-9EE289A1595F}.ReleaseRhino7Mac|Any CPU.ActiveCfg = ReleaseRhino7Mac|Any CPU
+		{83072288-AA4D-4A48-AB9F-9EE289A1595F}.ReleaseRhino7Mac|Any CPU.Build.0 = ReleaseRhino7Mac|Any CPU
+		{83072288-AA4D-4A48-AB9F-9EE289A1595F}.ReleaseRhino7Win|Any CPU.ActiveCfg = ReleaseRhino7Win|Any CPU
+		{83072288-AA4D-4A48-AB9F-9EE289A1595F}.ReleaseRhino7Win|Any CPU.Build.0 = ReleaseRhino7Win|Any CPU
+		{83072288-AA4D-4A48-AB9F-9EE289A1595F}.ReleaseRhino8Mac|Any CPU.ActiveCfg = ReleaseRhino8Mac|Any CPU
+		{83072288-AA4D-4A48-AB9F-9EE289A1595F}.ReleaseRhino8Mac|Any CPU.Build.0 = ReleaseRhino8Mac|Any CPU
+		{83072288-AA4D-4A48-AB9F-9EE289A1595F}.ReleaseRhino8Win|Any CPU.ActiveCfg = ReleaseRhino8Win|Any CPU
+		{83072288-AA4D-4A48-AB9F-9EE289A1595F}.ReleaseRhino8Win|Any CPU.Build.0 = ReleaseRhino8Win|Any CPU
+		{CA3D5F80-3DE1-49C2-BBA9-CED0453DB030}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CA3D5F80-3DE1-49C2-BBA9-CED0453DB030}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CA3D5F80-3DE1-49C2-BBA9-CED0453DB030}.DebugRhino6Win|Any CPU.ActiveCfg = Debug|Any CPU
+		{CA3D5F80-3DE1-49C2-BBA9-CED0453DB030}.DebugRhino6Win|Any CPU.Build.0 = Debug|Any CPU
+		{CA3D5F80-3DE1-49C2-BBA9-CED0453DB030}.DebugRhino7Mac|Any CPU.ActiveCfg = Debug|Any CPU
+		{CA3D5F80-3DE1-49C2-BBA9-CED0453DB030}.DebugRhino7Mac|Any CPU.Build.0 = Debug|Any CPU
+		{CA3D5F80-3DE1-49C2-BBA9-CED0453DB030}.DebugRhino7Win|Any CPU.ActiveCfg = Debug|Any CPU
+		{CA3D5F80-3DE1-49C2-BBA9-CED0453DB030}.DebugRhino7Win|Any CPU.Build.0 = Debug|Any CPU
+		{CA3D5F80-3DE1-49C2-BBA9-CED0453DB030}.DebugRhino8Win|Any CPU.ActiveCfg = Debug|Any CPU
+		{CA3D5F80-3DE1-49C2-BBA9-CED0453DB030}.DebugRhino8Win|Any CPU.Build.0 = Debug|Any CPU
+		{CA3D5F80-3DE1-49C2-BBA9-CED0453DB030}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CA3D5F80-3DE1-49C2-BBA9-CED0453DB030}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CA3D5F80-3DE1-49C2-BBA9-CED0453DB030}.ReleaseRhino6Win|Any CPU.ActiveCfg = Release|Any CPU
+		{CA3D5F80-3DE1-49C2-BBA9-CED0453DB030}.ReleaseRhino6Win|Any CPU.Build.0 = Release|Any CPU
+		{CA3D5F80-3DE1-49C2-BBA9-CED0453DB030}.ReleaseRhino7Mac|Any CPU.ActiveCfg = Release|Any CPU
+		{CA3D5F80-3DE1-49C2-BBA9-CED0453DB030}.ReleaseRhino7Mac|Any CPU.Build.0 = Release|Any CPU
+		{CA3D5F80-3DE1-49C2-BBA9-CED0453DB030}.ReleaseRhino7Win|Any CPU.ActiveCfg = Release|Any CPU
+		{CA3D5F80-3DE1-49C2-BBA9-CED0453DB030}.ReleaseRhino7Win|Any CPU.Build.0 = Release|Any CPU
+		{CA3D5F80-3DE1-49C2-BBA9-CED0453DB030}.ReleaseRhino8Mac|Any CPU.ActiveCfg = Release|Any CPU
+		{CA3D5F80-3DE1-49C2-BBA9-CED0453DB030}.ReleaseRhino8Mac|Any CPU.Build.0 = Release|Any CPU
+		{CA3D5F80-3DE1-49C2-BBA9-CED0453DB030}.ReleaseRhino8Win|Any CPU.ActiveCfg = Release|Any CPU
+		{CA3D5F80-3DE1-49C2-BBA9-CED0453DB030}.ReleaseRhino8Win|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

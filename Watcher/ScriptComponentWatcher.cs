@@ -12,7 +12,7 @@ namespace StudioAvw.Gh.Parasites.Watcher
         {
             Document = document;
             CurrentScript = GetScript();
-            Debouncer = DebounceHelper.Debounce(SendUpdate, 100);
+            Debouncer = DebounceHelper.Debounce(SendUpdate, 500);
 
             document.SolutionExpired += SolutionExpired;
             document.ObjectChanged += ObjectChanged;
