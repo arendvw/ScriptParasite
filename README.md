@@ -50,10 +50,11 @@ This plugin is reported to have been working for mac.
 The plugin is open source (MIT Licence) and available on Github. If you have suggestions or improvements, throw me an email, or send an issue/pull request on github, and I'll get back to you.
 
 #### Version history
-2021-08-18, Version 1.1.0: Fixed whitespace issues, line numbers are now matching the line numbers in the editor. Solved Visual Studio and Visual Studio Code problems, improved robustness. Dropped Rhino 5 / grasshopper 0.9.x support.
-2020-11-06, Version 1.0.4: Update for mac: no longer adding a backslash before the filename
-2019-03-12, Version 1.0.1: Now adding importing and exporting namespaces in the custom namespaces area.
-2018-12-21, Version 1.0.0: Initial release
+
+- 2021-08-18, Version 1.1.0: Fixed whitespace issues, line numbers are now matching the line numbers in the editor. Solved Visual Studio and Visual Studio Code problems, improved robustness. Dropped Rhino 5 / grasshopper 0.9.x support.
+- 2020-11-06, Version 1.0.4: Update for mac: no longer adding a backslash before the filename
+- 2019-03-12, Version 1.0.1: Now adding importing and exporting namespaces in the custom namespaces area.
+- 2018-12-21, Version 1.0.0: Initial release
 
 #### Credits
 - [Andrew Heumann], [Anton Kerezov], [Zac Zhang] for kindly contributing code improvements
