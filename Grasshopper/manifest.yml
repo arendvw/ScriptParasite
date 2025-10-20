@@ -1,8 +1,8 @@
----
+﻿---
 name: ScriptParasite
 version: 1.2.1
 authors:
-- Arend van Waart
+  - Arend van Waart
 description: Edit C# components with any Editor or IDE such as Visual Studio
 url: https://github.com/arendvw/ScriptParasite
 secret:

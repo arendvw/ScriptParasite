@@ -1,0 +1,84 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <!-- Select the framework(s) you wish to target.
+        Rhino 6: net45
+        Rhino 7: net48
+        Rhino 8 Windows: net48, net7.0, net7.0-windows, net7.0-windows10.0.22000.0, etc
+        Rhino 8 Mac: net7.0, net7.0-macos, net7.0-macos12.0, etc
+    -->
+        <TargetFrameworks>net7.0-windows;net7.0;net48;net8.0-windows;net8.0</TargetFrameworks>
+        <EnableDynamicLoading>true</EnableDynamicLoading>
+        <TargetExt>.gha</TargetExt>
+        <NoWarn>NU1701;NETSDK1086;CA1416;MSB3277</NoWarn>
+        <EnableWindowsTargeting>true</EnableWindowsTargeting>
+        <RootNamespace>ScriptParasite</RootNamespace>
+        <LangVersion>Latest</LangVersion>
+        <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+        <Version>2.0.1</Version>
+        <Title>Script Parasite 2</Title>
+        <Company>StudioAvw</Company>
+        <Description>Edit C# and Python scripts in your favorite code editors, compatible with Rhino 8's new script sources.</Description>
+        <Authors>Arend van Waart</Authors>
+        <Url>https://github.com/arendvw/ScriptParasite</Url>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Grasshopper" Version="8.23.25251.13001" ExcludeAssets="runtime" />
+        <PackageReference Include="JetBrains.Annotations" Version="2025.2.2" ExcludeAssets="runtime" />
+    </ItemGroup>
+
+    <!-- For Windows only builds -->
+    <PropertyGroup Condition="$(TargetFramework.Contains('-windows')) or $(TargetFramework.StartsWith('net4'))">
+        <UseWindowsForms>true</UseWindowsForms>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Reference Include="RhinoCodePluginGH">
+            <HintPath>C:\Program Files\Rhino 8\Plug-ins\Grasshopper\Components\RhinoCodePluginGH.gha</HintPath>
+            <Private>false</Private>
+        </Reference>
+    </ItemGroup>
+    <!-- Reference WinForms for .NET 7.0 on macOS -->
+    <ItemGroup Condition="!($(TargetFramework.Contains('-windows')) or $(TargetFramework.StartsWith('net4')))">
+        <!-- Rhino 8.11 and later you can use this -->
+        <!-- <FrameworkReference Include="Microsoft.WindowsDesktop.App.WindowsForms" /> -->
+
+        <!-- Rhino 8.10 and earlier -->
+        <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net48" Version="1.0.3"
+                          ExcludeAssets="all" GeneratePathProperty="true" />
+        <Reference
+            Include="$(PkgMicrosoft_NETFramework_ReferenceAssemblies_net48)\build\.NETFramework\v4.8\System.Windows.Forms.dll"
+            Private="False" />
+        <PackageReference Include="System.Drawing.Common" Version="7.0.0" ExcludeAssets="runtime" />
+
+    </ItemGroup>
+    <ItemGroup>
+      <None Remove="Icon\icon.png" />
+      <EmbeddedResource Include="Icon\icon.png" />
+      <None Remove="Icon\icon-large.png" />
+      <EmbeddedResource Include="Icon\icon-large.png" />
+    </ItemGroup>
+
+    <Target Name="BuildYakPackage" AfterTargets="DispatchToInnerBuilds">
+        <PropertyGroup>
+            <YakExecutable
+                Condition="$(YakExecutable) == '' and $([MSBuild]::IsOSPlatform(windows)) and Exists('C:\Program Files\Rhino 8\System\Yak.exe')">C:\Program Files\Rhino 8\System\Yak.exe</YakExecutable>
+            <YakExecutable
+                Condition="$(YakExecutable) == '' and $([MSBuild]::IsOSPlatform(macos)) and Exists('/Applications/Rhino 8.app/Contents/Resources/bin/yak')">/Applications/Rhino 8.app/Contents/Resources/bin/yak</YakExecutable>
+
+            <BuildYakPackage Condition="$(BuildYakPackage) == '' and $(YakExecutable) != '' and Exists($(YakExecutable))">True</BuildYakPackage>
+        </PropertyGroup>
+        <Warning Text="Could not find Yak executable" Condition="$(YakExecutable) == ''" />
+        <ItemGroup>
+            <YakPackagesToDelete Include="$(OutputPath)\*.yak;$(OutputPath)\**\manifest.yml" />
+        </ItemGroup>
+        <Warning Text="Writing yak package to $(OutputPath) $(BuildYakPackage)" />
+        <Delete Files="@(YakPackagesToDelete)" />
+        <Exec Command="&quot;$(YakExecutable)&quot; spec" WorkingDirectory="$(OutputPath)"
+              Condition="$(BuildYakPackage) == 'True'" />
+        <Exec Command="&quot;$(YakExecutable)&quot; build" WorkingDirectory="$(OutputPath)"
+              Condition="$(BuildYakPackage) == 'True'" />
+    </Target>
+
+</Project>

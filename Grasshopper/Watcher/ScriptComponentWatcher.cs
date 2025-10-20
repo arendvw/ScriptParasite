@@ -1,27 +1,27 @@
 ﻿using System;
 using Grasshopper.Kernel;
-using ScriptComponents;
-using StudioAvw.Gh.Parasites.Component;
-using StudioAvw.Gh.Parasites.Helper;
+using JetBrains.Annotations;
+using RhinoCodePluginGH.Components;
+using ScriptParasite.Helper;
 
-namespace StudioAvw.Gh.Parasites.Watcher
-{
+namespace ScriptParasite.Watcher;
+
     public class ScriptComponentWatcher : IDisposable
     {
-        public ScriptComponentWatcher(Component_CSNET_Script document)
+        public ScriptComponentWatcher(BaseLanguageComponent component)
         {
-            Document = document;
+            Component = component;
             CurrentScript = GetScript();
             Debouncer = DebounceHelper.Debounce(SendUpdate, 500);
 
-            document.SolutionExpired += SolutionExpired;
-            document.ObjectChanged += ObjectChanged;
-            document.AttributesChanged += DocumentOnAttributesChanged;
+            component.SolutionExpired += SolutionExpired;
+            component.ObjectChanged += ObjectChanged;
+            component.AttributesChanged += DocumentOnAttributesChanged;
         }
 
         private void SendUpdate()
         {
-            ScriptUpdated?.Invoke(this, new EventArgs());
+            ScriptUpdated?.Invoke(this, EventArgs.Empty);
         }
 
         private Action Debouncer { get; set; }
@@ -44,45 +44,47 @@ namespace StudioAvw.Gh.Parasites.Watcher
             Debouncer?.Invoke();
         }
 
-        public event EventHandler<EventArgs> ScriptUpdated;
+        [UsedImplicitly] public event EventHandler<EventArgs> ScriptUpdated;
 
         public string CurrentScript { get; set; }
 
         public string GetScript()
         {
-            return $"{Document.ScriptSource.AdditionalCode}" +
-                   $"{Document.ScriptSource.ScriptCode}" +
-                   $"{Document.ScriptSource.UsingCode}" +
-                   $"{ ScriptParasiteComponent.ExtractScriptParameters(Document) }";
+            var result = Component.TryGetSource(out var script);
+            if (result)
+            {
+                return script;
+            }
+            return null;
         }
 
         private void SolutionExpired(IGH_DocumentObject sender, GH_SolutionExpiredEventArgs e)
         {
+            
             if (IsUpdating)
             {
                 return;
             }
-            if (CurrentScript != GetScript())
-            {
-                CurrentScript = GetScript();
-                Debouncer?.Invoke();
-            }
+            var script = GetScript();
+            if (CurrentScript == GetScript() || script == null) return;
+            
+            CurrentScript = script;
+            Debouncer?.Invoke();
         }
         
-        public Component_CSNET_Script Document { get; set; }
+        public BaseLanguageComponent Component { get; set; }
         public bool IsUpdating { get; set; }
 
         public void Dispose()
         {
-            if (Document == null)
+            if (Component == null)
             {
                 return;
             }
 
-            Document.SolutionExpired -= SolutionExpired;
-            Document.ObjectChanged -= ObjectChanged;
-            Document.AttributesChanged -= DocumentOnAttributesChanged;
+            Component.SolutionExpired -= SolutionExpired;
+            Component.ObjectChanged -= ObjectChanged;
+            Component.AttributesChanged -= DocumentOnAttributesChanged;
 
         }
     }
-}
