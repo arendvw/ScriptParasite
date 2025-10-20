@@ -4,9 +4,7 @@
 When enabled, the script parasite component watches the C# component it’s grouped with, and writes the changes to the file [Nickname].cs in the selected folder. By default this is the folder “GrasshopperScripts” in my documents.
 
 #### Installation
-
-- Rhino 6 using Package manager: using the command `TestPackageManager`, and select ScriptParasite
-- Rhino 7 using Package manager: Type the command `PackageManager`, and select ScriptParasite
+- Rhino 8 using Package manager: Type the command `PackageManager`, and select ScriptParasite 2
 - Manual installation for all versions: Download the latest .zip file, and place in rhino's plugin and grasshopper component folder.
 
 #### Getting started
