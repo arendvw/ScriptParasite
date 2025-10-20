@@ -5,7 +5,8 @@ When enabled, the script parasite component watches the C# component it’s grou
 
 #### Installation
 - Rhino 8 using Package manager: Type the command `PackageManager`, and select ScriptParasite 2
-- Manual installation for all versions: Download the latest .zip file, and place in rhino's plugin and grasshopper component folder.
+- Rhino 7: Package manager: Type the command `PackageManager`, and select ScriptParasite
+- Manual installation for all versions: Download the latest .zip file from food4rhino, and place in rhino's plugin and grasshopper component folder.
 
 #### Getting started
 
@@ -49,6 +50,7 @@ The plugin is open source (MIT Licence) and available on Github. If you have sug
 
 #### Version history
 
+- 2025-09-25: Version 2.0.0: Major update: compatiblity with Rhino 8, dropped backwards compatiblity with Rhino 6/7. Now possible to use python components as well.
 - 2021-08-18, Version 1.1.0: Fixed whitespace issues, line numbers are now matching the line numbers in the editor. Solved Visual Studio and Visual Studio Code problems, improved robustness. Dropped Rhino 5 / grasshopper 0.9.x support.
 - 2020-11-06, Version 1.0.4: Update for mac: no longer adding a backslash before the filename
 - 2019-03-12, Version 1.0.1: Now adding importing and exporting namespaces in the custom namespaces area.
